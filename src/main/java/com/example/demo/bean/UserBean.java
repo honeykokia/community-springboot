@@ -1,5 +1,6 @@
 package com.example.demo.bean;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import jakarta.persistence.Column;
@@ -30,10 +31,10 @@ public class UserBean {
     private String email;
     @Column(name = "password")
     private String password;
-    @Column(name = "Gender")
+    @Column(name = "gender")
     private String Gender;
     @Column(name = "birthday")
-    private LocalDateTime birthday;
+    private LocalDate birthday;
     @Column(name = "image")
     private String image_path;
     @Column(name = "created_at")
