@@ -1,6 +1,5 @@
 package com.example.demo.service;
 
-import java.lang.classfile.ClassFile.Option;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -15,39 +14,44 @@ import com.example.demo.repository.UserRepository;
 import com.example.demo.utils.EmailVaildator;
 import com.example.demo.utils.PasswordVaildator;
 
-import lombok.extern.java.Log;
-import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
 @Service
 public class UserService {
 
     @Autowired
     private UserRepository userRepo;
 
-    public Optional<UserBean> loginCheck(LoginRequest request) {
+    public Optional<Map<String,String>> loginCheck(LoginRequest request) {
 
+        HashMap<String,String> errors = new HashMap<String,String>();
         Optional<UserBean> userOpt = userRepo.findByEmail(request.getEmail());
 
         if(userOpt.isEmpty()) {
+            errors.put("email", "帳號或密碼錯誤");
+        }
+
+        if(userOpt.isPresent() && !userOpt.get().getPassword().equals(request.getPassword())) {
+            errors.put("password", "帳號或密碼錯誤");
+        }
+
+        if(request.getEmail() == "" || request.getEmail() == null) {
+            errors.put("email", "請輸入信箱");
+        }
+
+        if(request.getPassword() == "" || request.getPassword() == null) {
+            errors.put("password", "請輸入密碼");
+        }
+
+        if(errors.isEmpty()){
             return Optional.empty();
         }
 
-        UserBean user = userOpt.get();
-
-        if(!user.getPassword().equals(request.getPassword())) {
-            return Optional.empty();
-        }
-
-        return Optional.of(user);
+        return Optional.of(errors);
     }
 
     public Optional<Map<String,String>> registerCheck(RegisterRequest request) {
 
         HashMap<String,String> errors = new HashMap<String,String>();
-        HashMap<String,Object> response = new HashMap<String,Object>();
-
-        log.info("request: " + request.getEmail());
 
         Optional<UserBean> userOpt = userRepo.findByEmail(request.getEmail());
 
@@ -118,4 +122,7 @@ public class UserService {
         return user;
     }
 
+    public Optional<UserBean> findByEmail(String email) {
+        return userRepo.findByEmail(email);
+    }
 }
