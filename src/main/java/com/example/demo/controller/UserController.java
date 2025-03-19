@@ -18,6 +18,8 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -70,7 +72,7 @@ public class UserController {
 
         Map<String,Object> response = new HashMap<>();
         response.put("status", "success");
-        response.put("errors", null);
+        // response.put("errors", null);
         response.put("data", Map.of(
             "id", user.getId(),
             "email", user.getEmail(),
@@ -81,10 +83,29 @@ public class UserController {
     }
     
     @PostMapping("/member")
-    public String member(@RequestBody String entity) {
-        //TODO: process POST request
+    public ResponseEntity<?> member() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
         
-        return entity;
+        Optional<UserBean> optUser = userService.findByEmail(email);
+        UserBean userBean = new UserBean();
+        if(optUser.isPresent()){
+            userBean = optUser.get();
+        }
+        
+        if (userBean.getGender().equals("male")) {
+            userBean.setGender("男");
+        } else if (userBean.getGender().equals("female")) {
+            userBean.setGender("女");
+        } else {
+            userBean.setGender("其他");
+        }
+
+        Map<String,Object> map = new HashMap<>();
+        map.put("status", "success");
+        map.put("data",userBean);
+
+        return ResponseEntity.ok(map);
     }
     
 }

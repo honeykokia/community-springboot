@@ -36,7 +36,7 @@ public class UserBean {
     @Column(name = "birthday")
     private LocalDate birthday;
     @Column(name = "image")
-    private String image_path;
+    private String image;
     @Column(name = "created_at")
     private LocalDateTime created_at;
     @Column(name = "last_login_at")

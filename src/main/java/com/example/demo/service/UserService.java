@@ -114,6 +114,7 @@ public class UserService {
         user.setGender(request.getGender());
         user.setEmail(request.getEmail());
         user.setPassword(request.getPassword());
+        user.setImage("/uploads/defaultAvatar.jpg");
         user.setRole((byte) 1);
         user.set_active(true);
         user.setCreated_at(java.time.LocalDateTime.now());
