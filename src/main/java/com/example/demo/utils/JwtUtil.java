@@ -1,5 +1,6 @@
 package com.example.demo.utils;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
 import javax.crypto.SecretKey;
@@ -13,9 +14,9 @@ import io.jsonwebtoken.security.Keys;
 
 @Component
 public class JwtUtil {
-    public static final SecretKey SECRET_KEY = Keys.secretKeyFor(SignatureAlgorithm.HS256);
+    public static final String SECRET_KEY = "iOjEsImlhdCI6MTc0MjE5ODA2NCwiZXh";
     public static final long EXPIRATION_TIME = 1000 * 60 * 60;
-
+    private static final SecretKey SECRET = Keys.hmacShaKeyFor(SECRET_KEY.getBytes(StandardCharsets.UTF_8));
 
     /*
      * 生成token
@@ -28,7 +29,7 @@ public class JwtUtil {
                 .claim("id",userId)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
-                .signWith(SECRET_KEY,SignatureAlgorithm.HS256)
+                .signWith(SECRET,SignatureAlgorithm.HS256)
                 .compact();
     }
 
@@ -38,7 +39,7 @@ public class JwtUtil {
      */
     public Claims extractClaims(String token){
         return Jwts.parserBuilder()
-                .setSigningKey(SECRET_KEY)
+                .setSigningKey(SECRET)
                 .build()
                 .parseClaimsJws(token)
                 .getBody();

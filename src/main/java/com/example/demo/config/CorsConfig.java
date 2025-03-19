@@ -1,5 +1,6 @@
 package com.example.demo.config;
 
+import java.io.ObjectInputFilter.Config;
 import java.util.Arrays;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -23,7 +24,6 @@ public class CorsConfig {
         CorsConfiguration config = new CorsConfiguration();
         // 允許的來源
         config.setAllowedOrigins(Arrays.asList(fronthost));
-        log.info(fronthost);
         // 允許的方法
         config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE"));
         // 允許的請求 header

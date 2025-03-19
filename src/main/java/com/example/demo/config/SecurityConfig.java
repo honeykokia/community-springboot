@@ -17,14 +17,14 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+            .cors(cors -> {})
+            .csrf(csrf -> csrf.disable()) // 可選擇關閉 CSRF（特別是 API）
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/user/login").permitAll()
                 .requestMatchers("/api/user/register").permitAll()
+                .requestMatchers("/uploads/**").permitAll()  
                 .anyRequest().authenticated()
             )
-            .formLogin(form -> form.disable())
-            .logout(logout -> logout.disable())
-            .csrf(csrf -> csrf.disable()) // 可選擇關閉 CSRF（特別是 API）
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
