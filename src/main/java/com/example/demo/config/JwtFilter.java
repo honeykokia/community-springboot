@@ -33,7 +33,6 @@ public class JwtFilter extends OncePerRequestFilter {
 
         String authHeader = request.getHeader("Authorization");
         if(authHeader == null || !authHeader.startsWith("Bearer ")) {
-            log.warn("缺少 Authorization 標頭");
             chain.doFilter(request, response);
             return;
         }
@@ -51,7 +50,7 @@ public class JwtFilter extends OncePerRequestFilter {
             response.setContentType("application/json");
             response.setCharacterEncoding("UTF-8"); 
             response.getWriter().write("{\"status\":\"error\", \"errors\":{\"token\":\"Token 無效或已過期\"}}"); 
-                return;
+            return;
         }
 
         chain.doFilter(request, response);
