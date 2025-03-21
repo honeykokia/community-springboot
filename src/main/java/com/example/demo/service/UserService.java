@@ -1,18 +1,25 @@
 package com.example.demo.service;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.example.demo.bean.UserBean;
 import com.example.demo.dto.LoginRequest;
+import com.example.demo.dto.MemberRequest;
 import com.example.demo.dto.RegisterRequest;
+import com.example.demo.exception.ApiException;
 import com.example.demo.repository.UserRepository;
+import com.example.demo.response.SuccessResponse;
 import com.example.demo.utils.EmailVaildator;
 import com.example.demo.utils.PasswordVaildator;
+
 
 
 @Service
@@ -107,7 +114,7 @@ public class UserService {
         return Optional.of(errors);
     }
 
-    public UserBean registerSave(RegisterRequest request) {
+    public ResponseEntity<?> registerSave(RegisterRequest request) {
         UserBean user = new UserBean();
         user.setName(request.getName());
         user.setBirthday(request.getBirthday());
@@ -120,10 +127,66 @@ public class UserService {
         user.setCreated_at(java.time.LocalDateTime.now());
 
         userRepo.save(user);
-        return user;
+
+        SuccessResponse response = new SuccessResponse(Map.of(
+            "id", user.getId(),
+            "email", user.getEmail(),
+            "created_at", user.getCreated_at()));
+
+        return ResponseEntity.ok(response);
     }
 
     public Optional<UserBean> findByEmail(String email) {
         return userRepo.findByEmail(email);
     }
+
+    public ResponseEntity<?> getMemberProfile(String email) {
+        Optional<UserBean> optUser = userRepo.findByEmail(email);
+        UserBean userBean = new UserBean();
+        if(optUser.isEmpty()){
+            throw new ApiException(Map.of("error", "查無此會員"));
+        }
+
+        userBean = optUser.get();
+        if (userBean.getGender().equals("male")) {
+            userBean.setGender("男");
+        } else if (userBean.getGender().equals("female")) {
+            userBean.setGender("女");
+        } else {
+            userBean.setGender("其他");
+        }
+
+        SuccessResponse response = new SuccessResponse(userBean);
+
+        return ResponseEntity.ok(response);
+    }
+
+    public ResponseEntity<?> uploadMemberProfile(MemberRequest request, MultipartFile file) {
+        Optional<UserBean> optUser = userRepo.findByEmail(request.getEmail());
+        UserBean userBean = new UserBean();
+        if(optUser.isEmpty()){
+            throw new ApiException(Map.of("general", "帳號更新失敗"));
+        }
+        userBean = optUser.get();
+        userBean.setName(request.getName());
+        userBean.setBirthday(request.getBirthday());
+        userBean.setPassword(request.getPassword());
+    
+        if(file !=null && !file.isEmpty()){
+            String uploadDir = System.getProperty("user.dir") + "/uploads/";
+            String fileName = file.getOriginalFilename();
+            File saveFile = new File(uploadDir + fileName);
+            try {
+                file.transferTo(saveFile);
+                userBean.setImage("/uploads/" + fileName);
+            } catch (Exception e) {
+                throw new ApiException(Map.of("general", "上傳圖片失敗"));
+            }
+        }
+        userRepo.save(userBean);
+
+        SuccessResponse response = new SuccessResponse(null);
+        return ResponseEntity.ok(response);
+    }
+
 }

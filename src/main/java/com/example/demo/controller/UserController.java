@@ -8,13 +8,14 @@ import com.example.demo.dto.LoginRequest;
 import com.example.demo.dto.MemberRequest;
 import com.example.demo.dto.RegisterRequest;
 import com.example.demo.exception.ApiException;
+import com.example.demo.response.SuccessResponse;
 import com.example.demo.service.UserService;
 import com.example.demo.utils.JwtUtil;
 
-import jakarta.servlet.http.HttpSession;
 
-import java.time.LocalDate;
-import java.util.HashMap;
+import jakarta.servlet.http.HttpSession;
+import lombok.extern.slf4j.Slf4j;
+
 import java.util.Map;
 import java.util.Optional;
 
@@ -22,15 +23,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/user")
 public class UserController {
@@ -51,16 +50,14 @@ public class UserController {
         }
 
         UserBean user = userService.findByEmail(request.getEmail()).get();
-
         String token = jwtUtil.generateToken(user.getEmail(), user.getId());
-
-        Map<String, Object> response = new HashMap<>();
-        response.put("status", "success");
-        response.put("token", token);
-        response.put("data", Map.of(
+        SuccessResponse response = new SuccessResponse(Map.of(
+                "token", token,
+                "image", user.getImage(),
                 "id", user.getId(),
                 "email", user.getEmail(),
                 "created_at", user.getCreated_at()));
+
         return ResponseEntity.ok(response);
     }
 
@@ -73,50 +70,22 @@ public class UserController {
             throw new ApiException(errors.get());
         }
 
-        UserBean user = userService.registerSave(request);
-
-        Map<String, Object> response = new HashMap<>();
-        response.put("status", "success");
-        // response.put("errors", null);
-        response.put("data", Map.of(
-                "id", user.getId(),
-                "email", user.getEmail(),
-                "created_at", user.getCreated_at()));
-
-        return ResponseEntity.ok(response);
+        return userService.registerSave(request);
     }
 
     @PostMapping("/member")
     public ResponseEntity<?> member() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
-        
-        Optional<UserBean> optUser = userService.findByEmail(email);
-        UserBean userBean = new UserBean();
-        if(optUser.isPresent()){
-            userBean = optUser.get();
-        }
-        
-        if (userBean.getGender().equals("male")) {
-            userBean.setGender("男");
-        } else if (userBean.getGender().equals("female")) {
-            userBean.setGender("女");
-        } else {
-            userBean.setGender("其他");
-        }
 
-        Map<String,Object> map = new HashMap<>();
-        map.put("status", "success");
-        map.put("data",userBean);
-
-        return ResponseEntity.ok(map);
+        return userService.getMemberProfile(email);
     }
 
     @PutMapping("/member")
     public ResponseEntity<?> memberSave(
         @RequestPart("data") MemberRequest request,
         @RequestPart(value = "file", required = false) MultipartFile file) {
-
-        return ResponseEntity.ok(Map.of("status", "success"));
+        
+        return userService.uploadMemberProfile(request, file);
     }
 }

@@ -1,6 +1,5 @@
 package com.example.demo.config;
 
-import java.io.ObjectInputFilter.Config;
 import java.util.Arrays;
 
 import org.springframework.beans.factory.annotation.Value;
