@@ -11,5 +11,6 @@ public class MemberRequest {
     private String name;
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate birthday;
+    private String email;
     private String password;
 }
