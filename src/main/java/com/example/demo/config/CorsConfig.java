@@ -24,7 +24,7 @@ public class CorsConfig {
         // 允許的來源
         config.setAllowedOrigins(Arrays.asList(fronthost));
         // 允許的方法
-        config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE"));
+        config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE","PATCH"));
         // 允許的請求 header
         config.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));
         // 是否允許 cookie 驗證
