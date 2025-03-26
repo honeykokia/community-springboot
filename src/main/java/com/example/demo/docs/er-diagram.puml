@@ -1,0 +1,64 @@
+@startuml
+' hide the spot
+' hide circle
+
+' avoid problems with angled crows feet
+skinparam linetype ortho
+
+left to right direction
+
+entity "user" as u {
+    *id : number <<generated>>
+    --
+    style_id : number<<FK>>
+    name : string
+    email : string
+    password : string
+    gender : string
+    birthday : date
+    image : string
+    created_at : datetime <<generated>>
+    last_login_at : datetime
+    is_active : boolean
+    role : tinyint
+}
+
+entity "user_style" as us{
+    *id : number <<generated>>
+    --
+    user_id : number <<FK>>
+    style_id : number <<FK>>
+    created_at : datetime <<generated>>
+}
+
+
+entity "style" as s {
+    *id : number <<generated>>
+    --
+    name : string
+    description : string
+    image : string
+    created_at : datetime <<generated>>
+
+}
+
+entity "account" as a{
+    *id : number <<generated>>
+    --
+    user_id : number <<FK>>
+    style_id : number <<FK>>
+    item_title : string
+    item_description : string
+    item_price : number
+    item_type : tinyint
+    item_image : string
+    created_at : datetime <<generated>>
+}
+
+    u ||--|{ s
+    a }|--|| u
+    a }|--|| s
+    us }|--|| u
+    us }|--|| s
+
+@enduml

@@ -10,19 +10,15 @@ import com.example.demo.dto.PasswordRequest;
 import com.example.demo.dto.RegisterRequest;
 import com.example.demo.dto.ValidationResult;
 import com.example.demo.exception.ApiException;
-import com.example.demo.response.SuccessResponse;
 import com.example.demo.service.UserService;
-import com.example.demo.utils.JwtUtil;
 
 
 import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.Map;
-import java.util.Optional;
+
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.security.SecurityProperties.User;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -52,7 +48,7 @@ public class UserController {
 
         UserBean user = result.getTarget();
 
-        return userService.loginCreateToke(user);
+        return userService.loginCreateToken(user);
     }
 
     @PostMapping("/register")

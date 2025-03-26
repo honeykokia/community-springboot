@@ -132,7 +132,7 @@ public class UserService {
 
     }
 
-    public ResponseEntity<?> loginCreateToke(UserBean user) {
+    public ResponseEntity<?> loginCreateToken(UserBean user) {
 
         String token = jwtUtil.generateToken(user.getEmail(), user.getId());
         SuccessResponse response = new SuccessResponse(Map.of(
