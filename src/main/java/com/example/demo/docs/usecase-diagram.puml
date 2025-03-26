@@ -1,0 +1,65 @@
+@startuml
+
+left to right direction
+
+
+package Actors {
+    actor "Guest" as g
+    actor "Member" as m
+}
+package Member {
+    usecase "Login" as loginUser
+    ' usecase "JWT token verify" as verifyJwtToken
+    ' usecase "email and password verify" as verifyEmailPassword
+    usecase "forget password" as forgetPassword
+
+    usecase "Register" as registerUser
+
+    usecase "Profile" as userProfile
+        usecase "Edit Profile" as editUserProfile   
+}
+
+
+package Account {
+    usecase "View Account List" as viewAccountList
+    usecase "Add Account" as addAccount
+    usecase "Edit Account" as editAccount
+    usecase "Search Account" as searchAccount
+    usecase "View Account Detail" as viewAccountDetail
+    usecase "Monthly Repor" as byMonth
+    
+    usecase "View Account wall" as viewAccountWall
+}
+
+package Style{
+    usecase "View Style List" as viewStyleList
+    usecase "Add Style" as addStyle
+    usecase "Search Style" as searchStyle
+    usecase "Create Style" as createStyle
+}
+
+
+g --> loginUser
+m --> userProfile
+m --> viewAccountList
+m --> viewStyleList
+m --> viewAccountWall
+
+
+
+loginUser --> forgetPassword: <<extend>>
+loginUser --> registerUser: <<extend>>
+userProfile --> editUserProfile: <<extend>>
+
+viewAccountList --> addAccount : <<extend>>
+viewAccountList --> editAccount : <<extend>>
+viewAccountList --> searchAccount : <<extend>>
+viewAccountList --> viewAccountDetail : <<extend>>
+viewAccountList --> byMonth : <<extend>>
+
+viewStyleList --> addStyle : <<extend>>
+viewStyleList --> searchStyle : <<extend>>
+
+
+
+@enduml

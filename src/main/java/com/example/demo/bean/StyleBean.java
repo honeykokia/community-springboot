@@ -1,6 +1,5 @@
 package com.example.demo.bean;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,43 +16,33 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+@AllArgsConstructor
+@NoArgsConstructor
 @Getter
 @Setter
-@NoArgsConstructor
-@AllArgsConstructor
 @Entity
-@Table(name = "user")
-public class UserBean {
+@Table(name = "style")
+public class StyleBean {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "style")
     private List<UserStyle> userStyles = new ArrayList<>();
 
-    @OneToMany(mappedBy = "user")
-    private List<AccountBean> account = new ArrayList<>();
+    @OneToMany(mappedBy = "style")
+    private List<AccountBean> accounts = new ArrayList<>();
 
     @Column(name = "name")
     private String name;
-    @Column(name = "email")
-    private String email;
-    @Column(name = "password")
-    private String password;
-    @Column(name = "gender")
-    private String Gender;
-    @Column(name = "birthday")
-    private LocalDate birthday;
+
+    @Column(name = "description")
+    private String description;
+
     @Column(name = "image")
     private String image;
+
     @Column(name = "created_at")
     private LocalDateTime created_at;
-    @Column(name = "last_login_at")
-    private LocalDateTime last_login_at;
-    @Column(name = "is_active")
-    private boolean is_active;
-    @Column(name = "role")
-    private byte role;
-
 
 }

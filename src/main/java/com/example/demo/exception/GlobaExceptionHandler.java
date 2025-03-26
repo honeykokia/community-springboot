@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 public class GlobaExceptionHandler {
     
     @ExceptionHandler(ApiException.class)
-    public ResponseEntity<Map<String,Object>> hadleApiException(ApiException e){
+    public ResponseEntity<Map<String,Object>> handleApiException(ApiException e){
         Map<String,Object> response = new HashMap<>();
         response.put("status", "error");
         response.put("errors", e.getErrors());
