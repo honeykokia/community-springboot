@@ -20,8 +20,6 @@ import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -39,7 +37,6 @@ public class UserController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request, HttpSession session) {
-
         ValidationResult<UserBean> result = userService.loginCheck(request);
 
         if (result.getErrors().isPresent()) {
@@ -65,10 +62,7 @@ public class UserController {
 
     @PostMapping("/member")
     public ResponseEntity<?> member() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String email = authentication.getName();
-
-        return userService.getMemberProfile(email);
+        return userService.getMemberProfile();
     }
 
     @PutMapping("/member")
@@ -81,11 +75,7 @@ public class UserController {
 
     @PatchMapping("/member")
     public ResponseEntity<?> memberPasswordUpdate(@RequestBody PasswordRequest request) {
-
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String email = authentication.getName();
-
-        ValidationResult<UserBean> result = userService.updatePasswordCheck(email,request);
+        ValidationResult<UserBean> result = userService.updatePasswordCheck(request);
 
         if (result.getErrors().isPresent()) {
             throw new ApiException(result.getErrors().get());

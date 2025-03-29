@@ -1,6 +1,9 @@
 package com.example.demo.bean;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -27,6 +30,7 @@ public class AccountBean {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "user_id")
     private UserBean user;
@@ -42,13 +46,16 @@ public class AccountBean {
     private String item_description;
 
     @Column(name = "item_price")
-    private String item_price;
+    private int item_price;
 
     @Column(name = "item_type")
     private String item_type;
 
     @Column(name = "item_image")
     private String item_image;
+
+    @Column(name = "item_date")
+    private LocalDate item_date;
 
     @Column(name = "created_at")
     private LocalDateTime created_at;
