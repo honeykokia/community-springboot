@@ -2,17 +2,17 @@ package com.example.demo.controller;
 
 import org.springframework.web.bind.annotation.RestController;
 
-
+import com.example.demo.dto.AccountRequest;
 import com.example.demo.service.AccountService;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 
 @RestController
@@ -23,12 +23,19 @@ public class AccountController {
     private AccountService accountService;
     
     @PostMapping("/list")
-    public ResponseEntity<?> account(@RequestBody String entity) {
+    public ResponseEntity<?> account() {
+        return accountService.accountGet();
+    }
 
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String email = authentication.getName();
+    @PostMapping("/add")
+    public ResponseEntity<?> addAccount(@RequestBody AccountRequest request) {
 
-        return accountService.getAccount(email);
+        return accountService.accountSave(request);
+    }
+
+    @DeleteMapping("/delete")
+    public ResponseEntity<?> deleteAccount(@RequestParam Long accountId) {
+        return accountService.accountDelete(accountId);
     }
     
 

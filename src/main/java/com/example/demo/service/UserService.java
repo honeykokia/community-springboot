@@ -19,6 +19,7 @@ import com.example.demo.dto.ValidationResult;
 import com.example.demo.exception.ApiException;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.response.SuccessResponse;
+import com.example.demo.utils.AuthUtil;
 import com.example.demo.utils.EmailVaildator;
 import com.example.demo.utils.JwtUtil;
 import com.example.demo.utils.ValidationUtils;
@@ -100,11 +101,13 @@ public class UserService {
         return result;
     }
 
-    public ValidationResult<UserBean> updatePasswordCheck(String email , PasswordRequest request){
+    public ValidationResult<UserBean> updatePasswordCheck(PasswordRequest request){
+
+        Long userId = AuthUtil.getCurrentUserId();
 
         ValidationResult<UserBean> result = new ValidationResult<UserBean>();
         HashMap<String,String> errors = new HashMap<String,String>();
-        Optional<UserBean> userOpt = userRepo.findByEmail(email);
+        Optional<UserBean> userOpt = userRepo.findById(userId);
 
         if(userOpt.isEmpty()) {
             errors.put("oldPassword", "密碼更新失敗");
@@ -167,11 +170,17 @@ public class UserService {
         return ResponseEntity.ok(response);
     }
 
-    public ResponseEntity<?> getMemberProfile(String email) {
-        Optional<UserBean> optUser = userRepo.findByEmail(email);
+    public ResponseEntity<?> getMemberProfile() {
+
+        Long userId = AuthUtil.getCurrentUserId();
+        if (userId == null){
+            throw new ApiException(Map.of("general", "查無此會員"));
+        }
+
+        Optional<UserBean> optUser = userRepo.findById(userId);
         UserBean userBean = new UserBean();
         if(optUser.isEmpty()){
-            throw new ApiException(Map.of("error", "查無此會員"));
+            throw new ApiException(Map.of("general", "查無此會員"));
         }
 
         userBean = optUser.get();
@@ -189,11 +198,12 @@ public class UserService {
     }
 
     public ResponseEntity<?> updateMemberProfile(MemberRequest request, MultipartFile file) {
-        Optional<UserBean> optUser = userRepo.findByEmail(request.getEmail());
-        UserBean userBean = new UserBean();
+        Long userId = AuthUtil.getCurrentUserId();
+        Optional<UserBean> optUser = userRepo.findById(userId);
         if(optUser.isEmpty()){
             throw new ApiException(Map.of("general", "帳號更新失敗"));
         }
+        UserBean userBean = new UserBean();
         userBean = optUser.get();
         userBean.setName(request.getName());
         userBean.setBirthday(request.getBirthday());
@@ -222,10 +232,6 @@ public class UserService {
 
         SuccessResponse response = new SuccessResponse(null);
         return ResponseEntity.ok(response);
-    }
-
-    public Optional<UserBean> findByEmail(String email) {
-        return userRepo.findByEmail(email);
     }
 
 }

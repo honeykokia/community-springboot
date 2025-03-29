@@ -39,12 +39,12 @@ public class JwtFilter extends OncePerRequestFilter {
 
         String token = authHeader.substring(7);
         try {
-            String email = jwtUtil.getEmailFromToken(token);
+            // String email = jwtUtil.getEmailFromToken(token);
             Long userId = jwtUtil.getUserIdFromToken(token);
-            request.setAttribute("email", email);
-            request.setAttribute("email", userId);
+            // request.setAttribute("email", email);
+            request.setAttribute("id", userId);
             UsernamePasswordAuthenticationToken authentication =
-        new UsernamePasswordAuthenticationToken(email, null, new ArrayList<>());
+        new UsernamePasswordAuthenticationToken(userId, null, new ArrayList<>());
         SecurityContextHolder.getContext().setAuthentication(authentication);
         } catch (ExpiredJwtException | SignatureException | MalformedJwtException e) {
             log.warn("Token 無效");
