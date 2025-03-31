@@ -42,7 +42,7 @@ entity "style" as style {
 
 }
 
-entity "account" as account{
+entity "records" as records{
     *id : number <<generated>>
     --
     user_id : number <<FK>>
@@ -53,6 +53,15 @@ entity "account" as account{
     item_price : number
     item_type : tinyint
     item_image : string
+    created_at : datetime <<generated>>
+}
+entity "account" as account{
+    *id : number <<generated>>
+    --
+    user_id : number <<FK>>
+    name : string
+    type : tinyint
+    initial_amount : string
     created_at : datetime <<generated>>
 }
 
@@ -70,9 +79,10 @@ entity "category" as category {
     ' user_style }|--|| user
     ' user_style }|--|| style
 
-    user ||--|{ account
-    account }|--|| category
-    account }|--|| style
+    user ||--|{ records
+    account }|--|| user
+    records }|--|| category
+    records }|--|| style
     user_style }|--|| user
     user_style }|--|| style
     user ||--|{ style
