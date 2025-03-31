@@ -7,7 +7,7 @@ skinparam linetype ortho
 
 left to right direction
 
-entity "user" as u {
+entity "user" as user {
     *id : number <<generated>>
     --
     style_id : number<<FK>>
@@ -23,7 +23,7 @@ entity "user" as u {
     role : tinyint
 }
 
-entity "user_style" as us{
+entity "user_style" as user_style{
     *id : number <<generated>>
     --
     user_id : number <<FK>>
@@ -32,7 +32,7 @@ entity "user_style" as us{
 }
 
 
-entity "style" as s {
+entity "style" as style {
     *id : number <<generated>>
     --
     name : string
@@ -42,11 +42,12 @@ entity "style" as s {
 
 }
 
-entity "account" as a{
+entity "account" as account{
     *id : number <<generated>>
     --
     user_id : number <<FK>>
     style_id : number <<FK>>
+    category_id : number <<FK>>
     item_title : string
     item_description : string
     item_price : number
@@ -55,10 +56,25 @@ entity "account" as a{
     created_at : datetime <<generated>>
 }
 
-    u ||--|{ s
-    a }|--|| u
-    a }|--|| s
-    us }|--|| u
-    us }|--|| s
+entity "category" as category {
+    *id : number <<generated>>
+    --
+    name : string
+    type : tinyint <<notnull>
+}
+
+    ' user ||--|{ style
+    ' account }|--|| user
+    ' account }|--|| style
+    ' account }|--|| category
+    ' user_style }|--|| user
+    ' user_style }|--|| style
+
+    user ||--|{ account
+    account }|--|| category
+    account }|--|| style
+    user_style }|--|| user
+    user_style }|--|| style
+    user ||--|{ style
 
 @enduml
