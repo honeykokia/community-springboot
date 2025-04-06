@@ -2,8 +2,8 @@ package com.example.demo.controller;
 
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.demo.dto.AccountRequest;
-import com.example.demo.service.AccountService;
+import com.example.demo.dto.RecordRequest;
+import com.example.demo.service.RecordService;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,26 +16,26 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 
 @RestController
-@RequestMapping("/api/account")
-public class AccountController {
+@RequestMapping("/api/record")
+public class RecordController {
 
     @Autowired
-    private AccountService accountService;
+    private RecordService recordService;
     
     @PostMapping("/list")
     public ResponseEntity<?> account() {
-        return accountService.accountGet();
+        return recordService.recordGet();
     }
 
     @PostMapping("/add")
-    public ResponseEntity<?> addAccount(@RequestBody AccountRequest request) {
+    public ResponseEntity<?> addAccount(@RequestBody RecordRequest request) {
 
-        return accountService.accountSave(request);
+        return recordService.recordSave(request);
     }
 
     @DeleteMapping("/delete")
     public ResponseEntity<?> deleteAccount(@RequestParam Long accountId) {
-        return accountService.accountDelete(accountId);
+        return recordService.recordDelete(accountId);
     }
     
 

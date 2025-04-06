@@ -2,6 +2,7 @@ package com.example.demo.controller;
 
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.view.RedirectView;
 
 import com.example.demo.bean.UserBean;
 import com.example.demo.dto.LoginRequest;
@@ -16,14 +17,19 @@ import com.example.demo.service.UserService;
 import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 
-
+import java.net.URL;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.PutMapping;
 
@@ -34,6 +40,9 @@ public class UserController {
 
     @Autowired
     private UserService userService;
+
+    @Value("${front.end.host}")
+    private String frontEndHost;
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request, HttpSession session) {
@@ -56,8 +65,20 @@ public class UserController {
         if (result.getErrors().isPresent()) {
             throw new ApiException(result.getErrors().get());
         }
-
         return userService.registerSave(request);
+
+    }
+
+    @GetMapping("/verify")
+    public RedirectView verify(@RequestParam String token) {
+        ValidationResult<UserBean> result = userService.verifyEmail(token);
+        if (result.getErrors().isPresent()) {
+            String message = result.getErrors().get().get("token");
+            message = URLEncoder.encode(message, StandardCharsets.UTF_8);
+            return new RedirectView(frontEndHost + "/verifyFail?message=" + message); // Redirect to a different URL
+        }
+
+        return new RedirectView(frontEndHost + "/verifySuccess"); // Redirect to a different URL
     }
 
     @PostMapping("/member")

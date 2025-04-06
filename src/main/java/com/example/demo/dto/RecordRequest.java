@@ -5,9 +5,10 @@ import java.time.LocalDate;
 import lombok.Data;
 
 @Data
-public class AccountRequest {
+public class RecordRequest {
 
     private String item_title;
+    private String item_note;
     private String item_description;
     private int item_price;
     private String item_type;

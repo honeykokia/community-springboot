@@ -5,6 +5,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.example.demo.enums.AccountStatus;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -29,10 +31,13 @@ public class UserBean {
     private Long id;
 
     @OneToMany(mappedBy = "user")
-    private List<UserStyle> userStyles = new ArrayList<>();
+    private List<AccountBean> accounts = new ArrayList<>();
+
+    @OneToMany(mappedBy = "follower")
+    private List<userAccountFollowBean> followingAccount = new ArrayList<>();
 
     @OneToMany(mappedBy = "user")
-    private List<AccountBean> account = new ArrayList<>();
+    private List<RecordBean> records = new ArrayList<>();
 
     @Column(name = "name")
     private String name;
@@ -50,10 +55,18 @@ public class UserBean {
     private LocalDateTime created_at;
     @Column(name = "last_login_at")
     private LocalDateTime last_login_at;
-    @Column(name = "is_active")
-    private boolean is_active;
+    @Column(name = "status")
+    private byte status;
     @Column(name = "role")
     private byte role;
 
+
+    public AccountStatus getAccountStatus(){
+        return AccountStatus.fromCode(status);
+    }
+
+    public void setAccountStatus(AccountStatus status){
+        this.status = status.getCode();
+    }
 
 }

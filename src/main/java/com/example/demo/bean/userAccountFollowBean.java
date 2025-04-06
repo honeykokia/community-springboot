@@ -1,13 +1,8 @@
 package com.example.demo.bean;
 
-import java.time.LocalDateTime;
-
-import org.hibernate.annotations.Columns;
-
-import jakarta.annotation.Generated;
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -19,24 +14,21 @@ import lombok.Setter;
 
 @AllArgsConstructor
 @NoArgsConstructor
-@Getter
 @Setter
+@Getter
 @Entity
-@Table(name = "user_style")
-public class UserStyle {
+@Table(name = "user_account_follow")
+public class userAccountFollowBean {
     @Id
-    @GeneratedValue(strategy = jakarta.persistence.GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
-    private UserBean user;
+    private UserBean follower;
 
     @ManyToOne
-    @JoinColumn(name = "style_id")
-    private StyleBean style;
-
-    @Column(name = "created_at")
-    private LocalDateTime created_at;
+    @JoinColumn(name = "account_id")
+    private AccountBean account;
 
 }
