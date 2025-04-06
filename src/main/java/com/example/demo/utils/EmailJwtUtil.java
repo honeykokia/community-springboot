@@ -8,13 +8,15 @@ import javax.crypto.SecretKey;
 import org.springframework.stereotype.Component;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 
 @Component
-public class JwtUtil {
-    public static final String SECRET_KEY = "iOjEsImlhdCI6MTc0MjE5ODA2NCwiZXh";
+public class EmailJwtUtil {
+
+    public static final String SECRET_KEY = "xsSEsAImSehDsSFgfdF89ds8goLJ9Sfs8D9wiZXh";
     public static final long EXPIRATION_TIME = 1000 * 60 * 60 ;
     private static final SecretKey SECRET = Keys.hmacShaKeyFor(SECRET_KEY.getBytes(StandardCharsets.UTF_8));
 
@@ -44,21 +46,20 @@ public class JwtUtil {
                 .parseClaimsJws(token)
                 .getBody();
     }
-    
+
     /*
      * 從token中獲取email
      * @param token
      */
     public String getEmailFromToken(String token){
-        return extractClaims(token).getSubject();
-    }
+        try {
+            return extractClaims(token).getSubject();
+        } catch (ExpiredJwtException e) {
+            // TODO: handle exception
+            return e.getClaims().getSubject();
+        }
 
-    /*
-     * 從token中獲取userId
-     * @param token
-     */
-    public Long getUserIdFromToken(String token){
-        return extractClaims(token).get("id",Long.class);
+        
     }
 
     /*

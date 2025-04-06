@@ -10,7 +10,7 @@ left to right direction
 entity "user" as user {
     *id : number <<generated>>
     --
-    style_id : number<<FK>>
+    ' style_id : number<<FK>>
     name : string
     email : string
     password : string
@@ -19,41 +19,8 @@ entity "user" as user {
     image : string
     created_at : datetime <<generated>>
     last_login_at : datetime
-    is_active : boolean
+    status : tinyint
     role : tinyint
-}
-
-entity "user_style" as user_style{
-    *id : number <<generated>>
-    --
-    user_id : number <<FK>>
-    style_id : number <<FK>>
-    created_at : datetime <<generated>>
-}
-
-
-entity "style" as style {
-    *id : number <<generated>>
-    --
-    name : string
-    description : string
-    image : string
-    created_at : datetime <<generated>>
-
-}
-
-entity "records" as records{
-    *id : number <<generated>>
-    --
-    user_id : number <<FK>>
-    style_id : number <<FK>>
-    category_id : number <<FK>>
-    item_title : string
-    item_description : string
-    item_price : number
-    item_type : tinyint
-    item_image : string
-    created_at : datetime <<generated>>
 }
 entity "account" as account{
     *id : number <<generated>>
@@ -61,9 +28,36 @@ entity "account" as account{
     user_id : number <<FK>>
     name : string
     type : tinyint
-    initial_amount : string
+    description : string
+    image : string
+    initial_amount : number
+    is_public : boolean
     created_at : datetime <<generated>>
 }
+entity "user_account_follow" as user_account_follow{
+    *id : number <<generated>>
+    --
+    follower_id : number <<FK>>
+    account_id : number <<FK>>
+    created_at : datetime <<generated>>
+
+}
+
+entity "record" as record{
+    *id : number <<generated>>
+    --
+    user_id : number <<FK>>
+    account_id : number <<FK>>
+    category_id : number <<FK>>
+    item_title : string
+    item_note : string
+    item_description : string
+    item_price : number
+    item_type : tinyint
+    item_image : string
+    created_at : datetime <<generated>>
+}
+
 
 entity "category" as category {
     *id : number <<generated>>
@@ -72,19 +66,11 @@ entity "category" as category {
     type : tinyint <<notnull>
 }
 
-    ' user ||--|{ style
-    ' account }|--|| user
-    ' account }|--|| style
-    ' account }|--|| category
-    ' user_style }|--|| user
-    ' user_style }|--|| style
-
-    user ||--|{ records
+    user ||--|{ record
     account }|--|| user
-    records }|--|| category
-    records }|--|| style
-    user_style }|--|| user
-    user_style }|--|| style
-    user ||--|{ style
+    record }|--|| category
+    record }|--|| account
+    user_account_follow }|--|| user
+    user_account_follow }|--|| account
 
 @enduml

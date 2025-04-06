@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -16,13 +17,16 @@ import com.example.demo.dto.MemberRequest;
 import com.example.demo.dto.PasswordRequest;
 import com.example.demo.dto.RegisterRequest;
 import com.example.demo.dto.ValidationResult;
+import com.example.demo.enums.AccountStatus;
 import com.example.demo.exception.ApiException;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.response.SuccessResponse;
 import com.example.demo.utils.AuthUtil;
+import com.example.demo.utils.EmailJwtUtil;
 import com.example.demo.utils.EmailVaildator;
 import com.example.demo.utils.JwtUtil;
 import com.example.demo.utils.ValidationUtils;
+
 
 
 @Service
@@ -34,6 +38,14 @@ public class UserService {
     @Autowired
     private JwtUtil jwtUtil;
 
+    @Autowired
+    private EmailJwtUtil emailJwtUtil;
+
+    @Autowired
+    private EmailService emailService;
+
+    @Value("${app.base-url}")
+    private String baseUrl;
 
     public ValidationResult<UserBean> loginCheck(LoginRequest request) {
 
@@ -41,16 +53,13 @@ public class UserService {
         HashMap<String,String> errors = new HashMap<String,String>();
         Optional<UserBean> userOpt = userRepo.findByEmail(request.getEmail());
 
-        ValidationUtils.checkIsBlank(errors, "email", request.getEmail(), "請輸入信箱");
-        ValidationUtils.checkIsBlank(errors, "password", request.getPassword(), "請輸入密碼");
         if(userOpt.isEmpty()) {
-            errors.put("email", "帳號或密碼錯誤");
-            result.setErrors(Optional.of(errors));
-            result.setTarget(null);
-            return result;
+            return ValidationResult.failFast("email", "帳號或密碼錯誤");
         }
 
         UserBean user = userOpt.get();
+        ValidationUtils.checkIsBlank(errors, "email", request.getEmail(), "請輸入信箱");
+        ValidationUtils.checkIsBlank(errors, "password", request.getPassword(), "請輸入密碼");
         ValidationUtils.comparePassword(errors, "password", user.getPassword(), request.getPassword(), "帳號或密碼錯誤");
     
         if(errors.isEmpty()){
@@ -110,10 +119,7 @@ public class UserService {
         Optional<UserBean> userOpt = userRepo.findById(userId);
 
         if(userOpt.isEmpty()) {
-            errors.put("oldPassword", "密碼更新失敗");
-            result.setErrors(Optional.of(errors));
-            result.setTarget(null);
-            return result;
+            return ValidationResult.failFast("oldPassword", "查無此會員");
         }
 
         UserBean user = userOpt.get();
@@ -143,6 +149,7 @@ public class UserService {
                 "image", user.getImage(),
                 "id", user.getId(),
                 "email", user.getEmail(),
+                "name" , user.getName(),
                 "created_at", user.getCreated_at()));
 
         return ResponseEntity.ok(response);
@@ -157,10 +164,14 @@ public class UserService {
         user.setPassword(request.getPassword());
         user.setImage("/uploads/defaultAvatar.jpg");
         user.setRole((byte) 1);
-        user.set_active(true);
+        user.setAccountStatus(AccountStatus.UNVERIFIED);
         user.setCreated_at(java.time.LocalDateTime.now());
 
         userRepo.save(user);
+
+        String token = emailJwtUtil.generateToken(user.getEmail(), user.getId());
+        String verifyUrl= baseUrl + "/api/user/verify?token=" + token;
+        emailService.sendEmail(user.getEmail(), verifyUrl);
 
         SuccessResponse response = new SuccessResponse(Map.of(
             "id", user.getId(),
@@ -168,6 +179,42 @@ public class UserService {
             "created_at", user.getCreated_at()));
 
         return ResponseEntity.ok(response);
+    }
+
+    public ValidationResult<UserBean> verifyEmail(String token) {
+
+        ValidationResult<UserBean> result = new ValidationResult<UserBean>();
+        HashMap<String,String> errors = new HashMap<String,String>();
+
+        String email = emailJwtUtil.getEmailFromToken(token);
+        Optional<UserBean> optUser = userRepo.findByEmail(email);
+
+        if(emailJwtUtil.isTokenExpired(token)){
+           return ValidationResult.failFast("token", "驗證連結已過期，請重新接收驗證信❌❌");
+        }
+
+        if(optUser.isEmpty()){
+            return ValidationResult.failFast("token", "查無此會員");
+        }
+        UserBean user = optUser.get();
+
+        if(user.getAccountStatus().equals(AccountStatus.ACTIVE)){
+            // return ValidationResult.failFast("token", "此信箱已驗證過👋👋");
+            return ValidationResult.failFast("token", "驗證連結已過期，請重新接收驗證信❌❌");
+            
+        }
+        
+        user.setAccountStatus(AccountStatus.ACTIVE);
+        userRepo.save(user);
+
+        if(errors.isEmpty()){
+            result.setErrors(Optional.empty());
+        }else{
+            result.setErrors(Optional.of(errors));
+        }
+        result.setTarget(user);
+
+        return result;
     }
 
     public ResponseEntity<?> getMemberProfile() {
