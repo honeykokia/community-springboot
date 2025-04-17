@@ -28,4 +28,10 @@ public class ValidationUtils {
         }
     }
 
+    public static void checkIsNegative(Map<String,String> errors , String fieldName , Long value , String message){
+        if( value != null && value < 0){
+            errors.put(fieldName, message);
+        }
+    }   
+
 }

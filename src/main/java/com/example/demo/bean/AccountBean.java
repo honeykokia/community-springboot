@@ -4,6 +4,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -30,6 +32,7 @@ public class AccountBean {
     @GeneratedValue(strategy =GenerationType.IDENTITY)
     private Long id;
 
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "user_id")
     private UserBean user;
@@ -42,17 +45,23 @@ public class AccountBean {
 
     @Column(name = "name")
     private String name;
+    
     @Column(name = "type")
     private byte type;
+
     @Column(name = "description")
     private String description;
+
     @Column(name = "image")
     private String image;
+
     @Column(name = "initial_amount")
     private Long initial_amount;
-    @Column(name = "current_amount")
-    private boolean is_public;
+
     @Column(name = "is_public")
+    private Boolean is_public;
+
+    @Column(name = "created_at")
     private LocalDateTime created_at;
 
 }

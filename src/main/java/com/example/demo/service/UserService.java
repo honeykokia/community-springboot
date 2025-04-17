@@ -1,16 +1,23 @@
 package com.example.demo.service;
 
 import java.io.File;
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.apache.tomcat.util.http.fileupload.FileUpload;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.example.demo.bean.AccountBean;
 import com.example.demo.bean.UserBean;
 import com.example.demo.dto.LoginRequest;
 import com.example.demo.dto.MemberRequest;
@@ -24,6 +31,7 @@ import com.example.demo.response.SuccessResponse;
 import com.example.demo.utils.AuthUtil;
 import com.example.demo.utils.EmailJwtUtil;
 import com.example.demo.utils.EmailVaildator;
+import com.example.demo.utils.FileUpoladUtil;
 import com.example.demo.utils.JwtUtil;
 import com.example.demo.utils.ValidationUtils;
 
@@ -44,6 +52,9 @@ public class UserService {
     @Autowired
     private EmailService emailService;
 
+    @Autowired
+    private StringRedisTemplate redisTemplate;
+
     @Value("${app.base-url}")
     private String baseUrl;
 
@@ -53,11 +64,17 @@ public class UserService {
         HashMap<String,String> errors = new HashMap<String,String>();
         Optional<UserBean> userOpt = userRepo.findByEmail(request.getEmail());
 
+
         if(userOpt.isEmpty()) {
             return ValidationResult.failFast("email", "帳號或密碼錯誤");
         }
 
         UserBean user = userOpt.get();
+
+        if(user.getAccountStatus().equals(AccountStatus.UNVERIFIED)){
+            return ValidationResult.failFast("verify", "此信箱尚未驗證，請至信箱收取驗證信");
+        }
+
         ValidationUtils.checkIsBlank(errors, "email", request.getEmail(), "請輸入信箱");
         ValidationUtils.checkIsBlank(errors, "password", request.getPassword(), "請輸入密碼");
         ValidationUtils.comparePassword(errors, "password", user.getPassword(), request.getPassword(), "帳號或密碼錯誤");
@@ -157,6 +174,16 @@ public class UserService {
 
     public ResponseEntity<?> registerSave(RegisterRequest request) {
         UserBean user = new UserBean();
+        AccountBean account = new AccountBean();
+        account.setName("我的現金");
+        account.setType((byte) 1);
+        account.setDescription("我的現金帳戶");
+        account.setImage("/uploads/defaultAccount.jpg");
+        account.setInitial_amount(0L);
+        account.setIs_public(false);
+        account.setCreated_at(java.time.LocalDateTime.now());
+        
+
         user.setName(request.getName());
         user.setBirthday(request.getBirthday());
         user.setGender(request.getGender());
@@ -166,6 +193,8 @@ public class UserService {
         user.setRole((byte) 1);
         user.setAccountStatus(AccountStatus.UNVERIFIED);
         user.setCreated_at(java.time.LocalDateTime.now());
+        user.setAccounts(new ArrayList<>(List.of(account)));
+        account.setUser(user);
 
         userRepo.save(user);
 
@@ -190,18 +219,16 @@ public class UserService {
         Optional<UserBean> optUser = userRepo.findByEmail(email);
 
         if(emailJwtUtil.isTokenExpired(token)){
-           return ValidationResult.failFast("token", "驗證連結已過期，請重新接收驗證信❌❌");
+           return ValidationResult.failFast("email", "驗證連結已過期，請重新接收驗證信❌❌");
         }
 
         if(optUser.isEmpty()){
-            return ValidationResult.failFast("token", "查無此會員");
+            return ValidationResult.failFast("email", "查無此會員");
         }
         UserBean user = optUser.get();
 
         if(user.getAccountStatus().equals(AccountStatus.ACTIVE)){
-            // return ValidationResult.failFast("token", "此信箱已驗證過👋👋");
-            return ValidationResult.failFast("token", "驗證連結已過期，請重新接收驗證信❌❌");
-            
+            return ValidationResult.failFast("email", "此信箱已驗證過👋👋");
         }
         
         user.setAccountStatus(AccountStatus.ACTIVE);
@@ -215,6 +242,33 @@ public class UserService {
         result.setTarget(user);
 
         return result;
+    }
+
+    public ResponseEntity<?> resendMail(String email) {
+
+        Optional<UserBean> optUser = userRepo.findByEmail(email);
+        if(optUser.isEmpty()){
+            throw new ApiException(Map.of("email", "查無此會員"));
+        }
+
+        if(optUser.get().getAccountStatus().equals(AccountStatus.ACTIVE)){
+            throw new ApiException(Map.of("email", "此信箱已驗證過👋👋"));
+        }
+
+        String key = "verify:cooldown:" + email;
+        if(redisTemplate.hasKey(key)){
+            throw new ApiException(Map.of("email", "請稍後再試，驗證信已發送過"));
+        }
+
+        UserBean user = optUser.get();
+
+        String newtoken = emailJwtUtil.generateToken(user.getEmail(), user.getId());
+        String verifyUrl= baseUrl + "/api/user/verify?token=" + newtoken;
+        emailService.sendEmail(user.getEmail(), verifyUrl);
+        redisTemplate.opsForValue().set(key, "1", Duration.ofMinutes(3));
+
+        SuccessResponse response = new SuccessResponse(null);
+        return ResponseEntity.ok(response);
     }
 
     public ResponseEntity<?> getMemberProfile() {
@@ -255,18 +309,8 @@ public class UserService {
         userBean.setName(request.getName());
         userBean.setBirthday(request.getBirthday());
         userBean.setPassword(request.getPassword());
-    
-        if(file !=null && !file.isEmpty()){
-            String uploadDir = System.getProperty("user.dir") + "/uploads/";
-            String fileName = file.getOriginalFilename();
-            File saveFile = new File(uploadDir + fileName);
-            try {
-                file.transferTo(saveFile);
-                userBean.setImage("/uploads/" + fileName);
-            } catch (Exception e) {
-                throw new ApiException(Map.of("general", "上傳圖片失敗"));
-            }
-        }
+        userBean.setImage(FileUpoladUtil.uploadFile(file));
+        
         userRepo.save(userBean);
 
         SuccessResponse response = new SuccessResponse(null);

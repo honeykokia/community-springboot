@@ -13,13 +13,12 @@ import com.example.demo.dto.ValidationResult;
 import com.example.demo.exception.ApiException;
 import com.example.demo.service.UserService;
 
-
 import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 
-import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -73,12 +72,18 @@ public class UserController {
     public RedirectView verify(@RequestParam String token) {
         ValidationResult<UserBean> result = userService.verifyEmail(token);
         if (result.getErrors().isPresent()) {
-            String message = result.getErrors().get().get("token");
+            String message = result.getErrors().get().get("email");
             message = URLEncoder.encode(message, StandardCharsets.UTF_8);
             return new RedirectView(frontEndHost + "/verifyFail?message=" + message); // Redirect to a different URL
         }
 
         return new RedirectView(frontEndHost + "/verifySuccess"); // Redirect to a different URL
+    }
+
+    @PostMapping("/resendMail")
+    public ResponseEntity<?> resendMail(@RequestBody Map<String,String> req) {
+        String email = req.get("email");
+        return userService.resendMail(email);
     }
 
     @PostMapping("/member")
@@ -90,7 +95,8 @@ public class UserController {
     public ResponseEntity<?> memberSave(
         @RequestPart("data") MemberRequest request,
         @RequestPart(value = "file", required = false) MultipartFile file) {
-        
+        //TODO: Wait add vaildation
+
         return userService.updateMemberProfile(request, file);
     }
 
