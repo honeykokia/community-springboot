@@ -52,14 +52,7 @@ public class EmailJwtUtil {
      * @param token
      */
     public String getEmailFromToken(String token){
-        try {
-            return extractClaims(token).getSubject();
-        } catch (ExpiredJwtException e) {
-            // TODO: handle exception
-            return e.getClaims().getSubject();
-        }
-
-        
+        return extractClaims(token).getSubject();
     }
 
     /*

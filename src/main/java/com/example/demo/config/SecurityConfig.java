@@ -22,8 +22,9 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/user/login").permitAll()
                 .requestMatchers("/api/user/register").permitAll()
-                .requestMatchers("/uploads/**").permitAll()
                 .requestMatchers("/api/user/verify").permitAll()
+                .requestMatchers("/api/user/resendMail").permitAll()
+                .requestMatchers("/uploads/**").permitAll()
                 .anyRequest().authenticated()
             )
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);

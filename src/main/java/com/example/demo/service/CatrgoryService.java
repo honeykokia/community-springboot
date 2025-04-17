@@ -16,7 +16,7 @@ public class CatrgoryService {
     @Autowired
     private CategoryRepository categoryRepo;
 
-    public ResponseEntity<?> categoryGet(){
+    public ResponseEntity<?> getAllCategories(){
         List<CategoryBean> categoryList = categoryRepo.findAll();
         SuccessResponse response = new SuccessResponse(categoryList);
         return ResponseEntity.ok(response);
