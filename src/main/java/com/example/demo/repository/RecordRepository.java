@@ -17,4 +17,6 @@ public interface RecordRepository extends JpaRepository<RecordBean, Long> {
     @Query("SELECT a FROM RecordBean a WHERE a.user.id = :id")
     Optional<List<RecordBean>> findByUserId(@Param("id") Long userId);
 
+    Optional<List<RecordBean>> findByAccountId(Long accountId);
+
 }

@@ -1,6 +1,5 @@
 package com.example.demo.service;
 
-import java.io.File;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
@@ -8,7 +7,6 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.security.SecurityProperties.User;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -17,6 +15,7 @@ import com.example.demo.bean.AccountBean;
 import com.example.demo.bean.UserBean;
 import com.example.demo.dto.AccountRequest;
 import com.example.demo.dto.ValidationResult;
+import com.example.demo.enums.AccountStatus;
 import com.example.demo.exception.ApiException;
 import com.example.demo.repository.AccountRepository;
 import com.example.demo.repository.UserRepository;
@@ -34,7 +33,7 @@ public class AccountService {
     @Autowired
     private UserRepository userRepo;
 
-    public ValidationResult<AccountBean> accountCheck(AccountRequest request) {
+    public ValidationResult<AccountBean> checkAccount(AccountRequest request) {
         Long userId = AuthUtil.getCurrentUserId();
         ValidationResult<AccountBean> result = new ValidationResult<>();
         Map<String, String> errors = new HashMap<>();
@@ -52,10 +51,16 @@ public class AccountService {
         UserBean user = userOpt.get();
         List<AccountBean> existingAccounts = user.getAccounts();
         for (AccountBean account : existingAccounts){
-            if(account.getName().equals(request.getName())){
-                errors.put("name", "帳號名稱已存在");
+            if(account.getName().equals(request.getName()) && account.getAccountStatus() == AccountStatus.ACTIVE){
+                errors.put("name", "帳戶名稱已存在");
                 break;
             }
+        }
+
+        List<AccountBean> accountList = accountRepo.findAllByUserIdAndStatus(userId,AccountStatus.ACTIVE.getCode());
+
+        if(accountList.size() >= 5) {
+            errors.put("name", "帳戶數量已達上限");
         }
 
         ValidationUtils.checkIsNegative(errors, "initial_amount", request.getInitial_amount(), "金額不能小於0");
@@ -73,7 +78,7 @@ public class AccountService {
     public ResponseEntity<?> getAllAccount(){
         Long userId = AuthUtil.getCurrentUserId();
         
-        List<AccountBean> accountList = accountRepo.findAllByUserId(userId);
+        List<AccountBean> accountList = accountRepo.findAllByUserIdAndStatus(userId, AccountStatus.ACTIVE.getCode());
         
 
         if (accountList.isEmpty()) {
@@ -98,10 +103,10 @@ public class AccountService {
         account.setDescription(request.getDescription());
         account.setImage("/uploads/defaultAccount.jpg");
         account.setInitial_amount(request.getInitial_amount());
+        account.setAccountStatus(AccountStatus.ACTIVE);
         account.setCreated_at(LocalDateTime.now());
         account.setIs_public(request.getIs_public());
-        account.setUser(user);
-        user.getAccounts().add(account);
+        user.addAccount(account);
 
         accountRepo.save(account);
 
@@ -118,7 +123,7 @@ public class AccountService {
     public ResponseEntity<?> getAccountById(Long accountId) {
         Long userId = AuthUtil.getCurrentUserId();
         
-        Optional<AccountBean> accountOpt = accountRepo.findByIdAndUserId(accountId, userId);
+        Optional<AccountBean> accountOpt = accountRepo.findByIdAndUserIdAndStatus(accountId, userId, AccountStatus.ACTIVE.getCode());
 
         
         AccountBean account = accountOpt.get();
@@ -129,7 +134,7 @@ public class AccountService {
 
     public ResponseEntity<?> updateAccountById(Long accountId, AccountRequest request , MultipartFile file) {
         Long userId = AuthUtil.getCurrentUserId();
-        Optional<AccountBean> accountOpt = accountRepo.findByIdAndUserId(accountId, userId);
+        Optional<AccountBean> accountOpt = accountRepo.findByIdAndUserIdAndStatus(accountId, userId, AccountStatus.ACTIVE.getCode());
 
         if (accountOpt.isEmpty()) {
             throw new ApiException(Map.of("account", "帳戶不存在"));
@@ -160,14 +165,22 @@ public class AccountService {
 
     public ResponseEntity<?> deleteAccountById(Long accountId) {
         Long userId = AuthUtil.getCurrentUserId();
-        Optional<AccountBean> accountOpt = accountRepo.findByIdAndUserId(accountId, userId);
+        Optional<AccountBean> accountOpt = accountRepo.findByIdAndUserIdAndStatus(accountId, userId, AccountStatus.ACTIVE.getCode());
 
         if (accountOpt.isEmpty()) {
-            throw new ApiException(Map.of("account", "帳戶不存在"));
+            throw new ApiException(Map.of("general", "帳戶不存在"));
+        }
+
+        List<AccountBean> accountList = accountRepo.findAllByUserIdAndStatus(userId , AccountStatus.ACTIVE.getCode());
+
+        if (accountList.size() <= 1) {
+            throw new ApiException(Map.of("general", "至少要有一個帳戶"));
         }
 
         AccountBean account = accountOpt.get();
-        accountRepo.delete(account);
+        account.setAccountStatus(AccountStatus.DISABLED);
+        // accountRepo.delete(account);
+        accountRepo.save(account);
 
         SuccessResponse response = new SuccessResponse(Map.of("message", "帳戶已刪除"));
 
