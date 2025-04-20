@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.example.demo.enums.AccountStatus;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -33,7 +34,7 @@ public class UserBean {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<AccountBean> accounts = new ArrayList<>();
-
+    
     @OneToMany(mappedBy = "follower")
     private List<userAccountFollowBean> followingAccount = new ArrayList<>();
 
@@ -68,6 +69,15 @@ public class UserBean {
 
     public void setAccountStatus(AccountStatus status){
         this.status = status.getCode();
+    }
+
+    public void addRecord(RecordBean record){
+        this.records.add(record);
+        record.setUser(this);
+    }
+    public void addAccount(AccountBean account){
+        this.accounts.add(account);
+        account.setUser(this);
     }
 
 }

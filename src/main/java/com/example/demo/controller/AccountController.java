@@ -10,7 +10,6 @@ import com.example.demo.dto.ValidationResult;
 import com.example.demo.exception.ApiException;
 import com.example.demo.service.AccountService;
 
-import io.micrometer.core.ipc.http.HttpSender.Response;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -19,7 +18,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.PutMapping;
 
@@ -42,7 +40,7 @@ public class AccountController {
     @PostMapping
     public ResponseEntity<?> addAccount(@RequestBody AccountRequest request) {
         //TODO: process PUT request
-        ValidationResult<AccountBean> result = accountService.accountCheck(request);
+        ValidationResult<AccountBean> result = accountService.checkAccount(request);
 
         if(result.getErrors().isPresent()){
             throw new ApiException(result.getErrors().get());

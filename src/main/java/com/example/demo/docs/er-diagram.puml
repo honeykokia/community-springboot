@@ -53,9 +53,9 @@ entity "record" as record{
     item_note : string
     item_description : string
     item_price : number
-    item_type : tinyint
     item_image : string
     created_at : datetime <<generated>>
+    updated_at : datetime <<generated>>
 }
 
 

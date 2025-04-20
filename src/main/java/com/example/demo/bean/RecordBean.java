@@ -35,9 +35,14 @@ public class RecordBean {
     @JoinColumn(name = "user_id")
     private UserBean user;
     
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "account_id")
-    private AccountBean account;  
+    private AccountBean account; 
+
+    @ManyToOne
+    @JoinColumn(name = "category_id")
+    private CategoryBean category;
 
     @Column(name = "item_title")
     private String item_title;
@@ -49,10 +54,7 @@ public class RecordBean {
     private String item_description;
 
     @Column(name = "item_price")
-    private int item_price;
-
-    @Column(name = "item_type")
-    private String item_type;
+    private Long item_price;
 
     @Column(name = "item_image")
     private String item_image;
@@ -62,6 +64,9 @@ public class RecordBean {
 
     @Column(name = "created_at")
     private LocalDateTime created_at;
+
+    @Column(name = "updated_at")
+    private LocalDateTime updated_at;
 
     
 }

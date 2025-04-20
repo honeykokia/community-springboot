@@ -1,15 +1,12 @@
 package com.example.demo.service;
 
-import java.io.File;
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import org.apache.tomcat.util.http.fileupload.FileUpload;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -180,6 +177,7 @@ public class UserService {
         account.setDescription("我的現金帳戶");
         account.setImage("/uploads/defaultAccount.jpg");
         account.setInitial_amount(0L);
+        account.setAccountStatus(AccountStatus.ACTIVE);
         account.setIs_public(false);
         account.setCreated_at(java.time.LocalDateTime.now());
         
