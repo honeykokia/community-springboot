@@ -20,10 +20,10 @@ public class SecurityConfig {
             .cors(cors -> {})
             .csrf(csrf -> csrf.disable()) // 可選擇關閉 CSRF（特別是 API）
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/user/login").permitAll()
-                .requestMatchers("/api/user/register").permitAll()
-                .requestMatchers("/api/user/verify").permitAll()
-                .requestMatchers("/api/user/resendMail").permitAll()
+                .requestMatchers("/user/login").permitAll()
+                .requestMatchers("/user/register").permitAll()
+                .requestMatchers("/user/verify").permitAll()
+                .requestMatchers("/user/resendMail").permitAll()
                 .requestMatchers("/uploads/**").permitAll()
                 .anyRequest().authenticated()
             )

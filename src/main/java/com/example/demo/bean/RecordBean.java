@@ -45,28 +45,28 @@ public class RecordBean {
     private CategoryBean category;
 
     @Column(name = "item_title")
-    private String item_title;
+    private String itemTitle;
 
     @Column(name = "item_note")
-    private String item_note;
+    private String itemNote;
 
     @Column(name = "item_description")
-    private String item_description;
+    private String itemDescription;
 
     @Column(name = "item_price")
-    private Long item_price;
+    private Long itemPrice;
 
     @Column(name = "item_image")
-    private String item_image;
+    private String itemImage;
 
     @Column(name = "item_date")
-    private LocalDate item_date;
+    private LocalDate itemDate;
 
     @Column(name = "created_at")
-    private LocalDateTime created_at;
+    private LocalDateTime createdAt;
 
     @Column(name = "updated_at")
-    private LocalDateTime updated_at;
+    private LocalDateTime updatedAt;
 
     
 }

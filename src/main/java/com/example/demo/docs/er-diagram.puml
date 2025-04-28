@@ -32,8 +32,10 @@ entity "account" as account{
     image : string
     initial_amount : number
     is_public : boolean
+    status : tinyint
     created_at : datetime <<generated>>
 }
+
 entity "user_account_follow" as user_account_follow{
     *id : number <<generated>>
     --
