@@ -11,7 +11,7 @@
 - Redis
 
 ## 功能地圖 (Functional Map)
-![image](https://github.com/user-attachments/assets/850432b1-1821-4ded-beb1-83b5ce658390)
+![functional-map](https://github.com/user-attachments/assets/38006be5-f78a-476d-9387-19138fdedb57)
 
 
 ### 使用者基本流程
@@ -19,7 +19,8 @@
 
 
 ## 資料表設計 (ER Diagram)
-![image](https://github.com/user-attachments/assets/9454178d-6ecc-4d7e-840a-1673a5330644)
+![er-diagram](https://github.com/user-attachments/assets/892cd904-41e8-4f70-b25e-7ed66c4c917c)
+
 
 
 ## API設計
