@@ -8,6 +8,7 @@ import com.example.demo.dto.ValidationResult;
 import com.example.demo.exception.ApiException;
 import com.example.demo.service.RecordService;
 
+import java.time.LocalDate;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -21,15 +22,21 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 
 @RestController
-@RequestMapping("/api/accounts/{accountId}/records")
+@RequestMapping("/account/{accountId}/records")
 public class RecordController {
 
     @Autowired
     private RecordService recordService;
     
     @GetMapping
-    public ResponseEntity<?> getRecordByAccountId(@PathVariable Long accountId) {
-        return recordService.getRecordByAccountId(accountId);
+    public ResponseEntity<?> getRecordByAccountId(
+        @PathVariable Long accountId ,
+        @RequestParam(defaultValue = "0") int page , 
+        @RequestParam(defaultValue = "10") int size ,
+        @RequestParam LocalDate startDate,
+        @RequestParam LocalDate endDate) {
+    
+        return recordService.getRecordByAccountId(accountId, page , size ,startDate, endDate);
     }
 
     @PostMapping
@@ -42,9 +49,9 @@ public class RecordController {
         return recordService.saveRecord(accountId,request);
     }
 
-    @DeleteMapping("/delete")
-    public ResponseEntity<?> deleteRecord(@RequestParam Long accountId) {
-        return recordService.recordDelete(accountId);
+    @DeleteMapping("/{recordId}")
+    public ResponseEntity<?> deleteRecord(@PathVariable Long accountId , @PathVariable Long recordId) {
+        return recordService.recordDelete(accountId,recordId);
     }
     
 

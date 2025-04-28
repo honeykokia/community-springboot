@@ -6,31 +6,56 @@ skinparam rectangle {
 }
 skinparam Linetype ortho
 skinparam packageStyle rectangle
-package member{
+package Member{
     rectangle "Login" <<complete>> as login
     rectangle "Register" <<complete>> as register
-    rectangle "Forget Password" <<design>> as forgetPw
+    rectangle "Forget Password" <<complete>> as forgetPw
     rectangle "Profile" <<complete>> as userProfile
     rectangle "Edit Profile" <<complete>> as editProfile
 }
 
-package account{
-    rectangle "View Account List" as viewAccountList
-    rectangle "Add Account" as addAccount
-    rectangle "Edit Account" as editAccount
-    rectangle "Search Account" as searchAccount
-    rectangle "View Account Detail" as viewAccountDetail
-    rectangle "Monthly Repor" as byMonth
-    rectangle "View Account wall" as viewAccountWall
+package Account{
+    rectangle "View Account List" <<complete>> as viewAccountList
+    rectangle "Add Account" <<complete>> as addAccount
+    rectangle "Edit Account" <<complete>> as editAccount
+    rectangle "Delete Account" <<complete>> as deleteAccount
+    rectangle "View Account Detail" <<complete>> as viewAccountDetail
 }
 
-package style{
-    rectangle "View Style List" as viewStyleList
-    rectangle "Add Style" as addStyle
-    rectangle "Search Style" as searchStyle
-    rectangle "Create Style" as createStyle
+package Record{
+    rectangle "Overview" <<complete>> as overview
+    rectangle "Add Record" <<complete>> as addRecord
+    rectangle "Edit Record" <<design>> as editRecord
+    rectangle "Delete Record" <<complete>> as deleteRecord
+}
+
+package SocialCommunity{
+    rectangle "View Record Wall" <<design>> as viewRecordWall
+    rectangle "Search Account" <<design>> as searchAccount
+    rectangle "Follow System" <<design>> as followSystem
+    rectangle "Notification System" <<design>> as notificationSystem
 }
 
 register --> login
 login --> viewAccountList
+login --> userProfile
+login --> overview
+login --> viewRecordWall
+userProfile --> editProfile
+viewAccountList --> addAccount
+viewAccountList --> editAccount
+viewAccountList --> deleteAccount
+viewAccountList --> viewAccountDetail
+overview --> addRecord
+overview --> editRecord
+overview --> deleteRecord
+viewRecordWall --> searchAccount
+
+
+legend
+  <b>功能狀態說明</b>
+  <color:LightGreen>■</color> 已完成（Complete）
+  <color:LightPink>■</color> 設計中（Design）
+endlegend
+
 @enduml

@@ -34,7 +34,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/user")
+@RequestMapping("/user")
 public class UserController {
 
     @Autowired
@@ -74,10 +74,10 @@ public class UserController {
         if (result.getErrors().isPresent()) {
             String message = result.getErrors().get().get("email");
             message = URLEncoder.encode(message, StandardCharsets.UTF_8);
-            return new RedirectView(frontEndHost + "/verifyFail?message=" + message); // Redirect to a different URL
+            return new RedirectView(frontEndHost + "/projectA/verifyFail?message=" + message); // Redirect to a different URL
         }
 
-        return new RedirectView(frontEndHost + "/verifySuccess"); // Redirect to a different URL
+        return new RedirectView(frontEndHost + "/projectA/verifySuccess"); // Redirect to a different URL
     }
 
     @PostMapping("/resendMail")
@@ -86,7 +86,7 @@ public class UserController {
         return userService.resendMail(email);
     }
 
-    @PostMapping("/member")
+    @GetMapping("/member")
     public ResponseEntity<?> member() {
         return userService.getMemberProfile();
     }
@@ -100,7 +100,7 @@ public class UserController {
         return userService.updateMemberProfile(request, file);
     }
 
-    @PatchMapping("/member")
+    @PatchMapping("/member/password")
     public ResponseEntity<?> memberPasswordUpdate(@RequestBody PasswordRequest request) {
         ValidationResult<UserBean> result = userService.updatePasswordCheck(request);
 

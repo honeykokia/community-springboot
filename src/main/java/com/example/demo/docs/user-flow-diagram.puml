@@ -1,0 +1,15 @@
+@startuml
+left to right direction
+
+rectangle "Login" as login
+rectangle "View Account List" as viewAccount
+rectangle "View Account Detail" as viewAccountDetail
+rectangle "Overview" as overview
+rectangle "Add Record" as addRecord
+
+login --> viewAccount
+viewAccount --> viewAccountDetail
+viewAccountDetail --> overview
+overview --> addRecord
+
+@enduml

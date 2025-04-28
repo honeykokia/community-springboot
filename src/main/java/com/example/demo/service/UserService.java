@@ -197,7 +197,7 @@ public class UserService {
         userRepo.save(user);
 
         String token = emailJwtUtil.generateToken(user.getEmail(), user.getId());
-        String verifyUrl= baseUrl + "/api/user/verify?token=" + token;
+        String verifyUrl= baseUrl + "/user/verify?token=" + token;
         emailService.sendEmail(user.getEmail(), verifyUrl);
 
         SuccessResponse response = new SuccessResponse(Map.of(
@@ -261,7 +261,7 @@ public class UserService {
         UserBean user = optUser.get();
 
         String newtoken = emailJwtUtil.generateToken(user.getEmail(), user.getId());
-        String verifyUrl= baseUrl + "/api/user/verify?token=" + newtoken;
+        String verifyUrl= baseUrl + "/user/verify?token=" + newtoken;
         emailService.sendEmail(user.getEmail(), verifyUrl);
         redisTemplate.opsForValue().set(key, "1", Duration.ofMinutes(3));
 
@@ -307,7 +307,11 @@ public class UserService {
         userBean.setName(request.getName());
         userBean.setBirthday(request.getBirthday());
         userBean.setPassword(request.getPassword());
-        userBean.setImage(FileUpoladUtil.uploadFile(file));
+
+        String image = FileUpoladUtil.uploadFile(file);
+        if (!image.equals("")){
+            userBean.setImage(image);
+        }
         
         userRepo.save(userBean);
 

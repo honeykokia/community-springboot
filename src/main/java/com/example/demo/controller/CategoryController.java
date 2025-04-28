@@ -9,13 +9,12 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.demo.service.CatrgoryService;
 
 @RestController
-@RequestMapping("/api/category")
+@RequestMapping("/category")
 public class CategoryController {
 
     @Autowired
     private CatrgoryService categoryService;
 
-    @GetMapping("/list")
     public ResponseEntity<?> getAllCategories() {
         return categoryService.getAllCategories();
     }
