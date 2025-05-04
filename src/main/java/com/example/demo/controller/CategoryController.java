@@ -15,6 +15,7 @@ public class CategoryController {
     @Autowired
     private CatrgoryService categoryService;
 
+    @GetMapping
     public ResponseEntity<?> getAllCategories() {
         return categoryService.getAllCategories();
     }
