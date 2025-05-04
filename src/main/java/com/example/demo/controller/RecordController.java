@@ -19,6 +19,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.PutMapping;
+
 
 
 @RestController
@@ -49,9 +51,15 @@ public class RecordController {
         return recordService.saveRecord(accountId,request);
     }
 
+    @PutMapping("/{recordId}")
+    public ResponseEntity<?> updateRecord(@PathVariable Long accountId, @PathVariable Long recordId , @RequestBody RecordRequest request) {
+        
+        return recordService.updateRecord(accountId,recordId,request);
+    }
+
     @DeleteMapping("/{recordId}")
     public ResponseEntity<?> deleteRecord(@PathVariable Long accountId , @PathVariable Long recordId) {
-        return recordService.recordDelete(accountId,recordId);
+        return recordService.deleteRecord(accountId,recordId);
     }
     
 

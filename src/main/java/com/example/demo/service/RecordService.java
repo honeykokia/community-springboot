@@ -91,13 +91,14 @@ public class RecordService {
         Long expense;
         if (startDate != null && endDate != null) {
             recordPage = recordRepo.findByAccountIdAndItemDateBetween(accountId, startDate, endDate, pageable);
-            income = recordRepo.sumIncomeBetween(accountId, startDate, endDate);
-            expense = recordRepo.sumExpenseBetween(accountId, startDate, endDate);
+            // income = recordRepo.sumIncomeBetween(accountId, startDate, endDate);
+            // expense = recordRepo.sumExpenseBetween(accountId, startDate, endDate);
         } else {
             recordPage = recordRepo.findByAccountId(accountId, pageable);
-            income = recordRepo.sumIncome(accountId);
-            expense = recordRepo.sumExpense(accountId);
+
         }
+        income = recordRepo.sumIncome(accountId);
+        expense = recordRepo.sumExpense(accountId);
         
         SuccessResponse response = new SuccessResponse(new PageRecordResponse(recordPage,income,expense));
 
@@ -133,7 +134,42 @@ public class RecordService {
         return ResponseEntity.ok(new SuccessResponse(null));
     }
 
-    public ResponseEntity<?> recordDelete(Long accountId , Long recordId){
+
+    public ResponseEntity<?> updateRecord(Long accountId , Long recordId , RecordRequest request){
+        Long userId = AuthUtil.getCurrentUserId();
+        Optional<RecordBean> recordOpt = recordRepo.findById(recordId);
+        if(recordOpt.isEmpty()){
+            throw new ApiException(Map.of("general","更新失敗"));
+        }
+
+        Optional<AccountBean> accountOpt = accountRepo.findByIdAndUserIdAndStatus(accountId, userId, AccountStatus.ACTIVE.getCode());
+        if(accountOpt.isEmpty()){
+            throw new ApiException(Map.of("general","找不到帳戶"));
+        }
+
+        AccountBean account = accountOpt.get();
+        RecordBean record = recordOpt.get();
+
+        if(!record.getAccount().getId().equals(account.getId())){
+            throw new ApiException(Map.of("general","帳戶不正確"));
+        }
+        
+        CategoryBean category = categoryRepo.findById(request.getCategoryId())
+            .orElseThrow(() -> new ApiException(Map.of("general", "找不到類別")));
+
+        record.setAccount(account);
+        record.setCategory(category);
+        record.setItemPrice(request.getItemPrice());
+        record.setItemNote(request.getItemNote());
+        record.setItemDate(request.getItemDate());
+        record.setUpdatedAt(LocalDateTime.now());
+        
+        recordRepo.save(record);
+
+        return ResponseEntity.ok(new SuccessResponse(null));
+    }
+
+    public ResponseEntity<?> deleteRecord(Long accountId , Long recordId){
         Long userId = AuthUtil.getCurrentUserId();
         Optional<RecordBean> recordOpt = recordRepo.findById(recordId);
         if(recordOpt.isEmpty()){
