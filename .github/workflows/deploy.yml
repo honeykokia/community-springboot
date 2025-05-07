@@ -1,0 +1,43 @@
+name: Deploy Spring Boot to GCP
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 🔄 Checkout repo
+        uses: actions/checkout@v3
+
+      - name: ☕ Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: 🧱 Build Spring Boot JAR
+        run: mvn clean package -DskipTests
+
+      - name: 🐳 Build Docker image
+        run: docker build -t projecta .
+
+      - name: 🚀 Deploy to GCP (via SSH)
+        uses: appleboy/ssh-action@v0.1.6
+        with:
+          host: ${{ secrets.GCP_HOST }}
+          username: ${{ secrets.GCP_USER }}
+          key: ${{ secrets.GCP_SSH_KEY }}
+          script: |
+            cd ~/projectA
+            docker stop projecta || true
+            docker rm projecta || true
+            docker build -t projecta .
+            docker run -d -p 8080:8080 \
+              -e SPRING_PROFILES_ACTIVE=prod \
+              -e SPRING_DATASOURCE_URL=${{ secrets.DATABASE_URL }} \
+              -e SPRING_DATASOURCE_USERNAME=${{ secrets.DATABASE_USER }} \
+              -e SPRING_DATASOURCE_PASSWORD=${{ secrets.DATABASE_PASS }} \
+              projecta
