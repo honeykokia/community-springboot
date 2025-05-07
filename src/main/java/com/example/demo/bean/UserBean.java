@@ -80,6 +80,9 @@ public class UserBean {
         account.setUser(this);
     }
 
+<<<<<<< HEAD
     
 
+=======
+>>>>>>> dev
 }
