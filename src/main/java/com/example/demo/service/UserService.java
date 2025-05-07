@@ -63,7 +63,7 @@ public class UserService {
 
 
         if(userOpt.isEmpty()) {
-            return ValidationResult.failFast("email", "帳號或密碼錯誤唷QQ");
+            return ValidationResult.failFast("email", "帳號或密碼錯誤唷~");
         }
 
         UserBean user = userOpt.get();
