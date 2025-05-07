@@ -2,7 +2,7 @@
 FROM openjdk:17
 
 # 複製 target 資料夾內的 jar 到容器中
-COPY projectA.jar app.jar
+COPY target/projectA.jar app.jar
 
 # 開放 8080 port
 EXPOSE 8080
