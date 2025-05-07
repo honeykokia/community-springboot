@@ -24,6 +24,15 @@ jobs:
       - name: 🐳 Build Docker image
         run: docker build -t projecta .
 
+      - name: 📦 Upload JAR to GCP
+        uses: appleboy/scp-action@v0.1.4
+        with:
+          host: ${{ secrets.GCP_HOST }}
+          username: ${{ secrets.GCP_USER }}
+          key: ${{ secrets.GCP_SSH_KEY }}
+          source: "target/projectA.jar"
+          target: "~/projectA/"
+
       - name: 🚀 Deploy to GCP (via SSH)
         uses: appleboy/ssh-action@v0.1.6
         with:
@@ -34,8 +43,8 @@ jobs:
             cd ~/projectA
             docker stop projecta || true
             docker rm projecta || true
-            docker build -t --name projecta .
-            docker run -d -p 8080:8080 \
+            docker build -t projecta .
+            docker run -d --name projecta -p 8080:8080 \
               -e SPRING_PROFILES_ACTIVE=prod \
               -e SPRING_DATASOURCE_URL=${{ secrets.DATABASE_URL }} \
               -e SPRING_DATASOURCE_USERNAME=${{ secrets.DATABASE_USER }} \
