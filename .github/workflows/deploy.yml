@@ -34,7 +34,7 @@ jobs:
             cd ~/projectA
             docker stop projecta || true
             docker rm projecta || true
-            docker build -t projecta .
+            docker build -t --name projecta .
             docker run -d -p 8080:8080 \
               -e SPRING_PROFILES_ACTIVE=prod \
               -e SPRING_DATASOURCE_URL=${{ secrets.DATABASE_URL }} \
