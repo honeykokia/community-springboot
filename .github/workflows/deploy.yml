@@ -40,7 +40,7 @@ jobs:
           username: ${{ secrets.GCP_USER }}
           key: ${{ secrets.GCP_SSH_KEY }}
           script: |
-            cd ~/projectA
+            cd ~/projectA-backend
             docker stop projecta-be || true
             docker rm projecta-be || true
             docker build -t projecta-be .
