@@ -31,7 +31,7 @@ jobs:
           username: ${{ secrets.GCP_USER }}
           key: ${{ secrets.GCP_SSH_KEY }}
           source: "target/projectA.jar"
-          target: "~/projectA/"
+          target: "~/projectA-backend/"
 
       - name: 🚀 Deploy to GCP (via SSH)
         uses: appleboy/ssh-action@v0.1.6
@@ -41,10 +41,10 @@ jobs:
           key: ${{ secrets.GCP_SSH_KEY }}
           script: |
             cd ~/projectA
-            docker stop projecta || true
-            docker rm projecta || true
-            docker build -t projecta .
-            docker run -d --name projecta -p 8080:8080 \
+            docker stop projecta-be || true
+            docker rm projecta-be || true
+            docker build -t projecta-be .
+            docker run -d --name projecta-be -p 8080:8080 \
               -e SPRING_PROFILES_ACTIVE=prod \
               -e SPRING_DATASOURCE_URL=${{ secrets.DATABASE_URL }} \
               -e SPRING_DATASOURCE_USERNAME=${{ secrets.DATABASE_USER }} \
