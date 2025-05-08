@@ -49,4 +49,4 @@ jobs:
               -e SPRING_DATASOURCE_URL=${{ secrets.DATABASE_URL }} \
               -e SPRING_DATASOURCE_USERNAME=${{ secrets.DATABASE_USER }} \
               -e SPRING_DATASOURCE_PASSWORD=${{ secrets.DATABASE_PASS }} \
-              projecta
+              projecta-be
