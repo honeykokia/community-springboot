@@ -24,6 +24,15 @@ jobs:
       - name: 🐳 Build Docker image
         run: docker build -t projecta .
 
+      - name: 🧹 SSH 清除舊 JAR
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.GCP_HOST }}
+          username: ${{ secrets.GCP_USER }}
+          key: ${{ secrets.GCP_SSH_KEY }}
+          script: |
+            rm -f ~/projectA-backend/target/projectA.jar
+
       - name: 📦 Upload JAR to GCP
         uses: appleboy/scp-action@v0.1.4
         with:
