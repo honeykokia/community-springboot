@@ -6,6 +6,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Random;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,7 +23,9 @@ import com.example.demo.dto.LoginRequest;
 import com.example.demo.dto.MemberRequest;
 import com.example.demo.dto.PasswordRequest;
 import com.example.demo.dto.RegisterRequest;
+import com.example.demo.dto.ResetPasswordRequest;
 import com.example.demo.dto.ValidationResult;
+import com.example.demo.dto.VerifyCodeRequest;
 import com.example.demo.enums.AccountStatus;
 import com.example.demo.exception.ApiException;
 import com.example.demo.repository.UserRepository;
@@ -30,6 +35,7 @@ import com.example.demo.utils.EmailJwtUtil;
 import com.example.demo.utils.EmailVaildator;
 import com.example.demo.utils.FileUpoladUtil;
 import com.example.demo.utils.JwtUtil;
+import com.example.demo.utils.PasswordVaildator;
 import com.example.demo.utils.ValidationUtils;
 
 
@@ -63,7 +69,7 @@ public class UserService {
 
 
         if(userOpt.isEmpty()) {
-            return ValidationResult.failFast("email", "帳號或密碼錯誤 ");
+            return ValidationResult.failFast("email", "帳號或密碼錯誤");
         }
 
         UserBean user = userOpt.get();
@@ -198,7 +204,7 @@ public class UserService {
 
         String token = emailJwtUtil.generateToken(user.getEmail(), user.getId());
         String verifyUrl= baseUrl + "/user/verify?token=" + token;
-        emailService.sendEmail(user.getEmail(), verifyUrl);
+        emailService.sendEmailByRegister(user.getEmail(), verifyUrl);
 
         SuccessResponse response = new SuccessResponse(Map.of(
             "id", user.getId(),
@@ -262,7 +268,7 @@ public class UserService {
 
         String newtoken = emailJwtUtil.generateToken(user.getEmail(), user.getId());
         String verifyUrl= baseUrl + "/user/verify?token=" + newtoken;
-        emailService.sendEmail(user.getEmail(), verifyUrl);
+        emailService.sendEmailByRegister(user.getEmail(), verifyUrl);
         redisTemplate.opsForValue().set(key, "1", Duration.ofMinutes(3));
 
         SuccessResponse response = new SuccessResponse(null);
@@ -321,6 +327,84 @@ public class UserService {
 
     public ResponseEntity<?> updatePassword(UserBean user , String password) {
         user.setPassword(password);
+        userRepo.save(user);
+
+        SuccessResponse response = new SuccessResponse(null);
+        return ResponseEntity.ok(response);
+    }
+
+    public ResponseEntity<?> forgetPassword(String email) {
+        Optional<UserBean> optUser = userRepo.findByEmail(email);
+        if(optUser.isEmpty()){
+            throw new ApiException(Map.of("email", "請確認信箱是否正確"));
+        }
+
+        UserBean user = optUser.get();
+        String code = String.valueOf(new Random().nextInt(900000) + 100000);
+        String key = "forget:password:" + email;
+        String verifyToken = emailJwtUtil.generateToken(user.getEmail(), user.getId());
+
+        if(redisTemplate.hasKey(key)){
+            throw new ApiException(Map.of("email", "請稍後再試，驗證信已發送過"));
+        }
+
+        redisTemplate.opsForValue().set(key, code, 5,TimeUnit.MINUTES);
+        emailService.sendEmailByForgetPassword(email, code);
+
+        SuccessResponse response = new SuccessResponse(Map.of("verifyToken", verifyToken));
+        return ResponseEntity.ok(response);
+    }
+
+    public ResponseEntity<?> verifyCode(VerifyCodeRequest request) {
+
+        String email= emailJwtUtil.getEmailFromToken(request.getVerifyToken());
+        Optional<UserBean> optUser = userRepo.findByEmail(email);
+
+        if(optUser.isEmpty()){
+            throw new ApiException(Map.of("token", "驗證失敗，請重新操作"));
+        }
+        UserBean user = optUser.get();
+        
+        String key = "forget:password:" + email;
+        String correctCode = redisTemplate.opsForValue().get(key);
+
+        if(correctCode == null){
+            throw new ApiException(Map.of("code", "驗證碼已過期，請重新接收驗證信"));
+        }
+
+        if(!correctCode.equals(request.getCode())){
+            throw new ApiException(Map.of("code", "驗證碼錯誤，請重新輸入"));
+        }
+
+        redisTemplate.delete(key);
+        String resetToken = emailJwtUtil.generateToken(user.getEmail(), user.getId());
+
+        SuccessResponse response = new SuccessResponse(Map.of("resetToken", resetToken));
+
+        return ResponseEntity.ok(response);
+    }
+
+    public ResponseEntity<?> resetPassword(ResetPasswordRequest request) {
+        String email = emailJwtUtil.getEmailFromToken(request.getResetToken());
+        Optional<UserBean> optUser = userRepo.findByEmail(email);
+        if(optUser.isEmpty()){
+            throw new ApiException(Map.of("email", "請確認信箱是否正確"));
+        }
+        UserBean user = optUser.get();
+
+        if(emailJwtUtil.isTokenExpired(request.getResetToken())){
+            throw new ApiException(Map.of("email", "驗證已過期，請重新接收驗證碼"));
+        }
+
+        if(!PasswordVaildator.isValidPassword(request.getPassword())){
+            throw new ApiException(Map.of("password", "密碼格式不符合，必須要有大小寫英文及數字，且長度要大於8小於12"));
+        }
+
+        if(!request.getPassword().equals(request.getConfirmPassword())){
+            throw new ApiException(Map.of("confirmPassword", "確認密碼不一致"));
+        }
+
+        user.setPassword(request.getPassword());
         userRepo.save(user);
 
         SuccessResponse response = new SuccessResponse(null);

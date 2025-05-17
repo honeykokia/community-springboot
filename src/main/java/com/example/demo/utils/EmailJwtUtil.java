@@ -17,7 +17,7 @@ import io.jsonwebtoken.security.Keys;
 public class EmailJwtUtil {
 
     public static final String SECRET_KEY = "xsSEsAImSehDsSFgfdF89ds8goLJ9Sfs8D9wiZXh";
-    public static final long EXPIRATION_TIME = 1000 * 60 * 60 ;
+    public static final long EXPIRATION_TIME = 1000 * 10 * 60 ;
     private static final SecretKey SECRET = Keys.hmacShaKeyFor(SECRET_KEY.getBytes(StandardCharsets.UTF_8));
 
     /*
