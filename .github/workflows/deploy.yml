@@ -24,6 +24,18 @@ jobs:
       - name: 🐳 Build Docker image
         run: docker build -t projecta .
 
+      - name: 📦 Zip the JAR
+        run: zip -r projectA.zip target/projectA.jar
+
+      - name: 📤 Upload ZIP to GCP
+        uses: appleboy/scp-action@v0.1.4
+        with:
+          host: ${{ secrets.GCP_HOST }}
+          username: ${{ secrets.GCP_USER }}
+          key: ${{ secrets.GCP_SSH_KEY }}
+          source: "projectA.zip"
+          target: "~/projectA-backend/"
+
       - name: 🧹 SSH 清除舊 JAR
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -33,15 +45,6 @@ jobs:
           script: |
             rm -f ~/projectA-backend/target/projectA.jar
 
-      - name: 📦 Upload JAR to GCP
-        uses: appleboy/scp-action@v0.1.4
-        with:
-          host: ${{ secrets.GCP_HOST }}
-          username: ${{ secrets.GCP_USER }}
-          key: ${{ secrets.GCP_SSH_KEY }}
-          source: "target/projectA.jar"
-          target: "~/projectA-backend/"
-
       - name: 🚀 Deploy to GCP (via SSH)
         uses: appleboy/ssh-action@v0.1.6
         with:
@@ -50,6 +53,8 @@ jobs:
           key: ${{ secrets.GCP_SSH_KEY }}
           script: |
             cd ~/projectA-backend
+            unzip -o projectA.zip
+            rm -f projectA.zip
             docker stop projecta-be || true
             docker rm projecta-be || true
             docker build -t projecta-be .
