@@ -24,17 +24,14 @@ jobs:
       - name: 🐳 Build Docker image
         run: docker build -t projecta .
 
-      - name: 📦 Zip the JAR
-        run: zip -r projectA-target.zip target/
-
-      - name: 📤 Upload ZIP to GCP
+      - name: 📦 Upload JAR to GCP
         uses: appleboy/scp-action@v0.1.4
         with:
           host: ${{ secrets.GCP_HOST }}
           username: ${{ secrets.GCP_USER }}
           key: ${{ secrets.GCP_SSH_KEY }}
-          source: "projectA-target.zip"
-          target: "~/projectA-backend/"
+          source: "target/projectA.jar"
+          target: "~/projectA/"
           
       - name: 🚀 Deploy to GCP (via SSH)
         uses: appleboy/ssh-action@v0.1.6
@@ -44,12 +41,10 @@ jobs:
           key: ${{ secrets.GCP_SSH_KEY }}
           script: |
             cd ~/projectA-backend
-            unzip -o projectA-target.zip
-            rm -f projectA-target.zip
             docker stop projecta-be || true
             docker rm projecta-be || true
             docker build -t projecta-be .
-            docker run -d --name projecta-be -p 8080:8080 \
+            docker run -d --name projecta-be --network my_network -p 8080:8080 \
               -e SPRING_PROFILES_ACTIVE=prod \
               -e SPRING_DATASOURCE_URL=${{ secrets.DATABASE_URL }} \
               -e SPRING_DATASOURCE_USERNAME=${{ secrets.DATABASE_USER }} \
