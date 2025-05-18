@@ -1,0 +1,5 @@
+spring:
+  data:
+    redis:
+      host: redis           # 這裡的 `redis` 是你的 Redis 容器名稱
+      port: 6379            # Redis 的默認端口
