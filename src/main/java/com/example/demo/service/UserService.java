@@ -410,5 +410,4 @@ public class UserService {
         SuccessResponse response = new SuccessResponse(null);
         return ResponseEntity.ok(response);
     }
-
 }
