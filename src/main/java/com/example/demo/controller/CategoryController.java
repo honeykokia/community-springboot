@@ -6,14 +6,14 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.demo.service.CatrgoryService;
+import com.example.demo.service.CategoryService;
 
 @RestController
 @RequestMapping("/category")
 public class CategoryController {
 
     @Autowired
-    private CatrgoryService categoryService;
+    private CategoryService categoryService;
 
     @GetMapping
     public ResponseEntity<?> getAllCategories() {

@@ -88,7 +88,7 @@ public class AccountService {
 
         return ResponseEntity.ok(response);
     }
-    public ResponseEntity<?> addAccount(AccountRequest request) {
+    public ResponseEntity<SuccessResponse> addAccount(AccountRequest request) {
         Long userId = AuthUtil.getCurrentUserId();
         
         Optional<UserBean> userOpt = userRepo.findById(userId);
