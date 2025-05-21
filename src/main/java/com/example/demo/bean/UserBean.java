@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.example.demo.enums.AccountStatus;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -54,9 +53,9 @@ public class UserBean {
     @Column(name = "image")
     private String image;
     @Column(name = "created_at")
-    private LocalDateTime created_at;
+    private LocalDateTime createdAt;
     @Column(name = "last_login_at")
-    private LocalDateTime last_login_at;
+    private LocalDateTime lastLoginAt;
     @Column(name = "status")
     private byte status;
     @Column(name = "role")

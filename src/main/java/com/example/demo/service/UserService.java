@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -170,7 +169,7 @@ public class UserService {
                 "id", user.getId(),
                 "email", user.getEmail(),
                 "name" , user.getName(),
-                "created_at", user.getCreated_at()));
+                "created_at", user.getCreatedAt()));
 
         return ResponseEntity.ok(response);
     }
@@ -182,10 +181,10 @@ public class UserService {
         account.setType((byte) 1);
         account.setDescription("我的現金帳戶");
         account.setImage("/uploads/defaultAccount.jpg");
-        account.setInitial_amount(0L);
+        account.setInitialAmount(0L);
         account.setAccountStatus(AccountStatus.ACTIVE);
-        account.setIs_public(false);
-        account.setCreated_at(java.time.LocalDateTime.now());
+        account.setIsPublic(false);
+        account.setCreatedAt(java.time.LocalDateTime.now());
         
 
         user.setName(request.getName());
@@ -196,7 +195,7 @@ public class UserService {
         user.setImage("/uploads/defaultAvatar.jpg");
         user.setRole((byte) 1);
         user.setAccountStatus(AccountStatus.UNVERIFIED);
-        user.setCreated_at(java.time.LocalDateTime.now());
+        user.setCreatedAt(java.time.LocalDateTime.now());
         user.setAccounts(new ArrayList<>(List.of(account)));
         account.setUser(user);
 
@@ -209,7 +208,7 @@ public class UserService {
         SuccessResponse response = new SuccessResponse(Map.of(
             "id", user.getId(),
             "email", user.getEmail(),
-            "created_at", user.getCreated_at()));
+            "created_at", user.getCreatedAt()));
 
         return ResponseEntity.ok(response);
     }

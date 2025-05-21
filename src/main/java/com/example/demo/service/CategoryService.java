@@ -11,7 +11,7 @@ import com.example.demo.repository.CategoryRepository;
 import com.example.demo.response.SuccessResponse;
 
 @Service
-public class CatrgoryService {
+public class CategoryService {
 
     @Autowired
     private CategoryRepository categoryRepo;

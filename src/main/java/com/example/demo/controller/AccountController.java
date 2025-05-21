@@ -39,7 +39,6 @@ public class AccountController {
     
     @PostMapping
     public ResponseEntity<?> addAccount(@RequestBody AccountRequest request) {
-        //TODO: process PUT request
         ValidationResult<AccountBean> result = accountService.checkAccount(request);
 
         if(result.getErrors().isPresent()){
@@ -57,8 +56,7 @@ public class AccountController {
 
     @PutMapping("/{id}")
     public ResponseEntity<?> updateAccountById(@PathVariable Long id, @RequestPart("data") AccountRequest request, @RequestPart(value = "file" , required = false) MultipartFile file) {
-        //TODO: Wait add vaildation
-        
+
         return accountService.updateAccountById(id, request, file);
     }
     
