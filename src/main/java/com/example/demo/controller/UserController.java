@@ -16,7 +16,6 @@ import com.example.demo.dto.VerifyCodeRequest;
 import com.example.demo.exception.ApiException;
 import com.example.demo.service.UserService;
 
-import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 
 import java.net.URLEncoder;
@@ -98,7 +97,6 @@ public class UserController {
     public ResponseEntity<?> memberSave(
         @RequestPart("data") MemberRequest request,
         @RequestPart(value = "file", required = false) MultipartFile file) {
-        //TODO: Wait add vaildation
 
         return userService.updateMemberProfile(request, file);
     }
@@ -116,7 +114,6 @@ public class UserController {
 
 
     /*
-     * TODO:
      * 1. 前端傳送email進來
      * 2. 資料庫確認該email是否存在
      * 3. 若存在則寄送驗證碼，並通知前端至信箱收取驗證碼
@@ -125,26 +122,22 @@ public class UserController {
      */
     @PostMapping("/forgetPassword/request")
     public ResponseEntity<?> forgetPassword(@RequestBody EmailRequest request) {
-        //TODO: process POST request
         String email = request.getEmail();
         return userService.forgetPassword(email);
     }
 
     /*
-     * TODO:
      * 1. 確認驗證碼是否正確
      * 2. 若正確則回傳token，並通知前端進入重設密碼頁面
      * 3. 若不正確則回傳錯誤訊息
      */
     @PostMapping("/forgetPassword/verify")
     public ResponseEntity<?> verifyCode(@RequestBody VerifyCodeRequest request) {
-        //TODO: process POST request
         
         return userService.verifyCode(request);
     }
     
     /*
-     * TODO:
      * 1. 接收前端的token和使用者新密碼輸入的新密碼
      * 2. 驗證token是否正確
      * 3. 若正確則更新密碼，並通知前端密碼已重設成功

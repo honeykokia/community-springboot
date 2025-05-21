@@ -10,7 +10,7 @@ public class AccountRequest {
     private byte type;
     private String description;
     private String image;
-    private Long initial_amount;
-    private Boolean is_public;
-    private LocalDateTime created_at;
+    private Long initialAmount;
+    private Boolean isPublic;
+    private LocalDateTime createdAt;
 }

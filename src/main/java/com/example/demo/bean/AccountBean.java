@@ -59,16 +59,16 @@ public class AccountBean {
     private String image;
 
     @Column(name = "initial_amount")
-    private Long initial_amount;
+    private Long initialAmount;
 
     @Column(name = "is_public")
-    private Boolean is_public;
+    private Boolean isPublic;
 
     @Column(name = "status")
     private byte status;
 
     @Column(name = "created_at")
-    private LocalDateTime created_at;
+    private LocalDateTime createdAt;
 
     public AccountStatus getAccountStatus(){
         return AccountStatus.fromCode(status);

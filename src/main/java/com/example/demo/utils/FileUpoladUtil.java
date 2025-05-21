@@ -17,7 +17,11 @@ public class FileUpoladUtil {
             return "";
         }
 
-        String ext = file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf("."));
+        String originalFilename = file.getOriginalFilename();
+        if (originalFilename == null || originalFilename.isEmpty()) {
+            throw new ApiException(Map.of("file", "檔案名稱錯誤"));
+        }
+        String ext = originalFilename.substring(originalFilename.lastIndexOf("."));
 
         if (!List.of(".jpg", ".jpeg", ".png", ".webp").contains(ext.toLowerCase())) {
             throw new ApiException(Map.of("file", "不支援的圖片格式"));
@@ -25,7 +29,7 @@ public class FileUpoladUtil {
 
 
         String uploadDir = System.getProperty("user.dir") + "/uploads/";
-        String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
+        String fileName = UUID.randomUUID() + "_" + originalFilename;
         File saveFile = new File(uploadDir + fileName);
         try {
             file.transferTo(saveFile);

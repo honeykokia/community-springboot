@@ -45,7 +45,7 @@ public class AccountService {
 
         ValidationUtils.checkIsBlank(errors, "name", request.getName(), "請輸入帳號名稱");
         ValidationUtils.checkIsBlank(errors, "description", request.getDescription(), "請輸入帳號描述");
-        ValidationUtils.checkNull(errors,"initial_amount", request.getInitial_amount(), "請輸入金額");
+        ValidationUtils.checkNull(errors,"initial_amount", request.getInitialAmount(), "請輸入金額");
 
         
         UserBean user = userOpt.get();
@@ -63,7 +63,7 @@ public class AccountService {
             errors.put("name", "帳戶數量已達上限");
         }
 
-        ValidationUtils.checkIsNegative(errors, "initial_amount", request.getInitial_amount(), "金額不能小於0");
+        ValidationUtils.checkIsNegative(errors, "initial_amount", request.getInitialAmount(), "金額不能小於0");
 
         if (errors.isEmpty()){
             result.setErrors(Optional.empty());
@@ -75,7 +75,7 @@ public class AccountService {
         return result;
     }
 
-    public ResponseEntity<?> getAllAccount(){
+    public ResponseEntity<SuccessResponse> getAllAccount(){
         Long userId = AuthUtil.getCurrentUserId();
         
         List<AccountBean> accountList = accountRepo.findAllByUserIdAndStatus(userId, AccountStatus.ACTIVE.getCode());
@@ -102,10 +102,10 @@ public class AccountService {
         account.setType((byte)1);
         account.setDescription(request.getDescription());
         account.setImage("/uploads/defaultAccount.jpg");
-        account.setInitial_amount(request.getInitial_amount());
+        account.setInitialAmount(request.getInitialAmount());
         account.setAccountStatus(AccountStatus.ACTIVE);
-        account.setCreated_at(LocalDateTime.now());
-        account.setIs_public(request.getIs_public());
+        account.setCreatedAt(LocalDateTime.now());
+        account.setIsPublic(request.getIsPublic());
         user.addAccount(account);
 
         accountRepo.save(account);
@@ -113,7 +113,7 @@ public class AccountService {
         SuccessResponse response = new SuccessResponse(Map.of(
             "id", user.getId(),
             "email", user.getEmail(),
-            "created_at", user.getCreated_at()));
+            "created_at", user.getCreatedAt()));
 
         
         return ResponseEntity.ok(response);
@@ -148,8 +148,8 @@ public class AccountService {
         AccountBean account = accountOpt.get();
         account.setName(request.getName());
         account.setDescription(request.getDescription());
-        account.setInitial_amount(request.getInitial_amount());
-        account.setIs_public(request.getIs_public());
+        account.setInitialAmount(request.getInitialAmount());
+        account.setIsPublic(request.getIsPublic());
 
         String image = FileUpoladUtil.uploadFile(file);
         if (!image.equals("")){
