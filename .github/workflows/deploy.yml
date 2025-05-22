@@ -19,7 +19,7 @@ jobs:
           distribution: 'temurin'
 
       - name: 🧪 Run Controller & Service Tests
-        run: mvn test -Dtest=*ControllerTest,*ServiceTest
+        run: mvn test -Dspring.profiles.active=test -Dtest=*ControllerTest,*ServiceTest
 
       - name: 🧱 Build Spring Boot JAR
         run: mvn clean package -DskipTests
