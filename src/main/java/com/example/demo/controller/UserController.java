@@ -149,7 +149,4 @@ public class UserController {
 
         return userService.resetPassword(request);
     }
-
-    
-
 }
