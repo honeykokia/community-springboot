@@ -13,4 +13,7 @@ public interface AccountRepository extends JpaRepository<AccountBean, Long> {
 
     List<AccountBean> findAllByUserIdAndStatus(Long userId , byte status);
     Optional<AccountBean> findByIdAndUserIdAndStatus(Long id, Long userId , byte status);
+
 }
+
+
