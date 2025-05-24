@@ -35,7 +35,7 @@ jobs:
           key: ${{ secrets.GCP_SSH_KEY }}
           source: "target/projectA.jar"
           target: "~/projectA-backend/"
-          
+
       - name: 🚀 Deploy to GCP (via SSH)
         uses: appleboy/ssh-action@v0.1.6
         with:

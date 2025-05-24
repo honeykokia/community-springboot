@@ -305,7 +305,7 @@ public class UserService {
         Long userId = AuthUtil.getCurrentUserId();
         Optional<UserBean> optUser = userRepo.findById(userId);
         if(optUser.isEmpty()){
-            throw new ApiException(Map.of("general", "帳號更新失敗"));
+            throw new ApiException(Map.of("email", "更新異常，請重新登入"));
         }
         UserBean userBean = new UserBean();
         userBean = optUser.get();

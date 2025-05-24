@@ -124,5 +124,4 @@ public class AccountControllerTest {
                 .andExpect(jsonPath("$.data[0].status").value(1))
                 .andExpect(jsonPath("$.data[0].createdAt").value("2025-05-21T10:30:00"));
     }
-
 }
