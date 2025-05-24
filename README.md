@@ -48,6 +48,9 @@
 - GET /member (取得使用者資訊)
 - PUT /member (修改使用者資訊)
 - PATCH /member/password (修改使用者密碼)
+- POST /forgetPassword/request (忘記密碼請求驗證碼)
+- POST /forgetPassword/verify (驗證碼驗證)
+- PUT /forgetPassword/reset (使用者修改密碼)
 
 ### 帳戶系統 (Account System)
 - GET /account (取得使用者所有帳戶列表)
