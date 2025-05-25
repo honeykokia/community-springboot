@@ -62,6 +62,7 @@ public class AccountService {
         if(accountList.size() >= 5) {
             errors.put("name", "帳戶數量已達上限");
         }
+        
 
         ValidationUtils.checkIsNegative(errors, "initialAmount", request.getInitialAmount(), "金額不能小於0");
 
