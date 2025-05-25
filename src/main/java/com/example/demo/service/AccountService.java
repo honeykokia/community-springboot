@@ -45,7 +45,7 @@ public class AccountService {
 
         ValidationUtils.checkIsBlank(errors, "name", request.getName(), "請輸入帳號名稱");
         ValidationUtils.checkIsBlank(errors, "description", request.getDescription(), "請輸入帳號描述");
-        ValidationUtils.checkNull(errors,"initial_amount", request.getInitialAmount(), "請輸入金額");
+        ValidationUtils.checkNull(errors,"initialAmount", request.getInitialAmount(), "請輸入金額");
 
         
         UserBean user = userOpt.get();
@@ -63,7 +63,7 @@ public class AccountService {
             errors.put("name", "帳戶數量已達上限");
         }
 
-        ValidationUtils.checkIsNegative(errors, "initial_amount", request.getInitialAmount(), "金額不能小於0");
+        ValidationUtils.checkIsNegative(errors, "initialAmount", request.getInitialAmount(), "金額不能小於0");
 
         if (errors.isEmpty()){
             result.setErrors(Optional.empty());
