@@ -25,7 +25,7 @@ jobs:
         run: mvn clean package -DskipTests
 
       - name: 🐳 Build Docker image
-        run: docker build -t projecta .
+        run: docker build -t projecta-be .
 
       - name: 📦 Upload JAR to GCP
         uses: appleboy/scp-action@v0.1.4
