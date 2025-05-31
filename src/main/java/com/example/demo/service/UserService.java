@@ -33,6 +33,7 @@ import com.example.demo.utils.AuthUtil;
 import com.example.demo.utils.EmailJwtUtil;
 import com.example.demo.utils.EmailVaildator;
 import com.example.demo.utils.FileUpoladUtil;
+import com.example.demo.utils.HashUtil;
 import com.example.demo.utils.JwtUtil;
 import com.example.demo.utils.PasswordVaildator;
 import com.example.demo.utils.ValidationUtils;
@@ -79,7 +80,7 @@ public class UserService {
 
         ValidationUtils.checkIsBlank(errors, "email", request.getEmail(), "請輸入信箱");
         ValidationUtils.checkIsBlank(errors, "password", request.getPassword(), "請輸入密碼");
-        ValidationUtils.comparePassword(errors, "password", user.getPassword(), request.getPassword(), "帳號或密碼錯誤");
+        ValidationUtils.compareinputAndDbPassword(errors, "password", user.getPassword(), request.getPassword(), "帳號或密碼錯誤");
     
         if(errors.isEmpty()){
             result.setErrors(Optional.empty());
@@ -191,7 +192,7 @@ public class UserService {
         user.setBirthday(request.getBirthday());
         user.setGender(request.getGender());
         user.setEmail(request.getEmail());
-        user.setPassword(request.getPassword());
+        user.setPassword(HashUtil.encode(request.getPassword()));
         user.setImage("/uploads/defaultAvatar.jpg");
         user.setRole((byte) 1);
         user.setAccountStatus(AccountStatus.UNVERIFIED);
