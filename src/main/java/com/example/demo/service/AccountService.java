@@ -14,7 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.example.demo.bean.AccountBean;
 import com.example.demo.bean.UserBean;
 import com.example.demo.dto.AccountRequest;
-import com.example.demo.dto.ValidationResult;
+import com.example.demo.dto.ValidationResultOld;
 import com.example.demo.enums.AccountStatus;
 import com.example.demo.exception.ApiException;
 import com.example.demo.repository.AccountRepository;
@@ -33,14 +33,14 @@ public class AccountService {
     @Autowired
     private UserRepository userRepo;
 
-    public ValidationResult<AccountBean> checkAccount(AccountRequest request) {
+    public ValidationResultOld<AccountBean> checkAccount(AccountRequest request) {
         Long userId = AuthUtil.getCurrentUserId();
-        ValidationResult<AccountBean> result = new ValidationResult<>();
+        ValidationResultOld<AccountBean> result = new ValidationResultOld<>();
         Map<String, String> errors = new HashMap<>();
 
         Optional<UserBean> userOpt = userRepo.findById(userId);
         if (userOpt.isEmpty()) {
-            return ValidationResult.failFast("user", "使用者不存在");
+            return ValidationResultOld.failFast("user", "使用者不存在");
         }
 
         ValidationUtils.checkIsBlank(errors, "name", request.getName(), "請輸入帳號名稱");

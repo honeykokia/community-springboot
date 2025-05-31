@@ -6,15 +6,17 @@ import org.springframework.web.servlet.view.RedirectView;
 
 import com.example.demo.bean.UserBean;
 import com.example.demo.dto.EmailRequest;
+import com.example.demo.dto.ErrorResult;
 import com.example.demo.dto.LoginRequest;
 import com.example.demo.dto.MemberRequest;
 import com.example.demo.dto.PasswordRequest;
 import com.example.demo.dto.RegisterRequest;
 import com.example.demo.dto.ResetPasswordRequest;
-import com.example.demo.dto.ValidationResult;
+import com.example.demo.dto.ValidationResultOld;
 import com.example.demo.dto.VerifyCodeRequest;
 import com.example.demo.exception.ApiException;
 import com.example.demo.service.UserService;
+import com.example.demo.utils.AuthUtil;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -47,24 +49,23 @@ public class UserController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
-        ValidationResult<UserBean> result = userService.loginCheck(request);
+        Long userId = AuthUtil.getCurrentUserId();
+        ErrorResult errors = userService.loginCheck(request);
 
-        if (result.getErrors().isPresent()) {
-            throw new ApiException(result.getErrors().get());
+        if (errors.hasErrors()) {
+            throw new ApiException(errors.getErrors());
         }
 
-        UserBean user = result.getTarget();
-
-        return userService.loginCreateToken(user);
+        return userService.loginCreateToken(userId);
     }
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
 
-        ValidationResult<UserBean> result = userService.registerCheck(request);
+        ErrorResult errors = userService.registerCheck(request);
     
-        if (result.getErrors().isPresent()) {
-            throw new ApiException(result.getErrors().get());
+        if (errors.hasErrors()) {
+            throw new ApiException(errors.getErrors());
         }
         return userService.registerSave(request);
 
@@ -72,9 +73,9 @@ public class UserController {
 
     @GetMapping("/verify")
     public RedirectView verify(@RequestParam String token) {
-        ValidationResult<UserBean> result = userService.verifyEmail(token);
-        if (result.getErrors().isPresent()) {
-            String message = result.getErrors().get().get("email");
+        ErrorResult errors = userService.verifyEmail(token);
+        if (errors.hasErrors()) {
+            String message = errors.getErrors().get("email");
             message = URLEncoder.encode(message, StandardCharsets.UTF_8);
             return new RedirectView(frontEndHost + "/projectA/verifyFail?message=" + message); // Redirect to a different URL
         }
@@ -90,26 +91,30 @@ public class UserController {
 
     @GetMapping("/member")
     public ResponseEntity<?> member() {
-        return userService.getMemberProfile();
+        Long userId = AuthUtil.getCurrentUserId();
+        return userService.getMemberProfile(userId);
     }
 
     @PutMapping("/member")
     public ResponseEntity<?> memberSave(
         @RequestPart("data") MemberRequest request,
         @RequestPart(value = "file", required = false) MultipartFile file) {
-
-        return userService.updateMemberProfile(request, file);
+        
+        Long userId = AuthUtil.getCurrentUserId();
+        return userService.updateMemberProfile(userId,request, file);
     }
 
     @PatchMapping("/member/password")
     public ResponseEntity<?> memberPasswordUpdate(@RequestBody PasswordRequest request) {
-        ValidationResult<UserBean> result = userService.updatePasswordCheck(request);
 
-        if (result.getErrors().isPresent()) {
-            throw new ApiException(result.getErrors().get());
+        Long userId = AuthUtil.getCurrentUserId();
+        ErrorResult errors = userService.updatePasswordCheck(userId,request);
+
+        if (errors.hasErrors()) {
+            throw new ApiException(errors.getErrors());
         }
 
-        return userService.updatePassword(result.getTarget(), request.getPassword());
+        return userService.updatePassword(userId,request.getPassword());
     }
 
 

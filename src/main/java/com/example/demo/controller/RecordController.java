@@ -4,7 +4,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.bean.RecordBean;
 import com.example.demo.dto.RecordRequest;
-import com.example.demo.dto.ValidationResult;
+import com.example.demo.dto.ValidationResultOld;
 import com.example.demo.exception.ApiException;
 import com.example.demo.service.RecordService;
 
@@ -44,7 +44,7 @@ public class RecordController {
     @PostMapping
     public ResponseEntity<?> addRecord(@PathVariable Long accountId , @RequestBody RecordRequest request) {
 
-        ValidationResult<RecordBean> result = recordService.checkRecord(accountId,request);
+        ValidationResultOld<RecordBean> result = recordService.checkRecord(accountId,request);
         if (result.getErrors().isPresent()) {
             throw new ApiException(result.getErrors().get());
         }

@@ -6,7 +6,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.example.demo.bean.AccountBean;
 import com.example.demo.dto.AccountRequest;
-import com.example.demo.dto.ValidationResult;
+import com.example.demo.dto.ValidationResultOld;
 import com.example.demo.exception.ApiException;
 import com.example.demo.service.AccountService;
 
@@ -39,7 +39,7 @@ public class AccountController {
     
     @PostMapping
     public ResponseEntity<?> addAccount(@RequestBody AccountRequest request) {
-        ValidationResult<AccountBean> result = accountService.checkAccount(request);
+        ValidationResultOld<AccountBean> result = accountService.checkAccount(request);
 
         if(result.getErrors().isPresent()){
             throw new ApiException(result.getErrors().get());

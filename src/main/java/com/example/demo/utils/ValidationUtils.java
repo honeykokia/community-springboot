@@ -4,6 +4,7 @@ import java.util.Map;
 
 public class ValidationUtils {
 
+
     public static void checkIsBlank(Map<String, String> errors, String fieldName, String value, String message) {
         if (value == null || value.isBlank()) {
             errors.put(fieldName, message);

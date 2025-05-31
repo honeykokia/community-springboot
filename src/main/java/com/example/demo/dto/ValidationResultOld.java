@@ -7,12 +7,12 @@ import java.util.Optional;
 import lombok.Data;
 
 @Data
-public class ValidationResult<T> {
+public class ValidationResultOld<T> {
     private T target;
     private Optional<Map<String,String>> errors;
 
-    public static <T> ValidationResult<T> failFast(String key , String message) {
-        ValidationResult<T> result = new ValidationResult<>();
+    public static <T> ValidationResultOld<T> failFast(String key , String message) {
+        ValidationResultOld<T> result = new ValidationResultOld<>();
         HashMap<String, String> errorMap = new HashMap<>();
         errorMap.put(key, message);
         result.setTarget(null);

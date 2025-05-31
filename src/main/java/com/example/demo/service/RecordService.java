@@ -20,7 +20,7 @@ import com.example.demo.bean.RecordBean;
 import com.example.demo.bean.UserBean;
 import com.example.demo.dto.PageRecordResponse;
 import com.example.demo.dto.RecordRequest;
-import com.example.demo.dto.ValidationResult;
+import com.example.demo.dto.ValidationResultOld;
 import com.example.demo.enums.AccountStatus;
 import com.example.demo.exception.ApiException;
 import com.example.demo.repository.AccountRepository;
@@ -46,14 +46,14 @@ public class RecordService {
     @Autowired
     private CategoryRepository categoryRepo;
 
-    public ValidationResult<RecordBean> checkRecord(Long accountId , RecordRequest request) {
+    public ValidationResultOld<RecordBean> checkRecord(Long accountId , RecordRequest request) {
         Long userId = AuthUtil.getCurrentUserId();
-        ValidationResult<RecordBean> result = new ValidationResult<>();
+        ValidationResultOld<RecordBean> result = new ValidationResultOld<>();
         Map<String, String> errors = new HashMap<>();
 
         Optional<UserBean> userOpt = userRepo.findById(userId);
         if (userOpt.isEmpty()) {
-            return ValidationResult.failFast("user", "使用者不存在");
+            return ValidationResultOld.failFast("user", "使用者不存在");
         }
 
         ValidationUtils.checkNull(errors, "account_id", accountId, "請選擇帳戶");
