@@ -2,7 +2,6 @@ package com.example.demo.service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -21,7 +20,7 @@ import com.example.demo.bean.UserBean;
 import com.example.demo.dto.ErrorResult;
 import com.example.demo.dto.PageRecordResponse;
 import com.example.demo.dto.RecordRequest;
-import com.example.demo.dto.ValidationResultOld;
+
 import com.example.demo.enums.AccountStatus;
 import com.example.demo.exception.ApiException;
 import com.example.demo.repository.AccountRepository;
@@ -29,9 +28,9 @@ import com.example.demo.repository.CategoryRepository;
 import com.example.demo.repository.RecordRepository;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.response.SuccessResponse;
-import com.example.demo.utils.AuthUtil;
+
 import com.example.demo.utils.ValidationResult;
-import com.example.demo.utils.ValidationUtils;
+
 
 import lombok.val;
 

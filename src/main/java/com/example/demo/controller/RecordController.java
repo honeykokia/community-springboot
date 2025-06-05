@@ -2,10 +2,9 @@ package com.example.demo.controller;
 
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.demo.bean.RecordBean;
+
 import com.example.demo.dto.ErrorResult;
 import com.example.demo.dto.RecordRequest;
-import com.example.demo.dto.ValidationResultOld;
 import com.example.demo.exception.ApiException;
 import com.example.demo.service.RecordService;
 import com.example.demo.utils.AuthUtil;

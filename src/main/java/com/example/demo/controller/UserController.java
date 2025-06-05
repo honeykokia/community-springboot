@@ -4,7 +4,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.view.RedirectView;
 
-import com.example.demo.bean.UserBean;
 import com.example.demo.dto.EmailRequest;
 import com.example.demo.dto.ErrorResult;
 import com.example.demo.dto.LoginRequest;
@@ -12,7 +11,7 @@ import com.example.demo.dto.MemberRequest;
 import com.example.demo.dto.PasswordRequest;
 import com.example.demo.dto.RegisterRequest;
 import com.example.demo.dto.ResetPasswordRequest;
-import com.example.demo.dto.ValidationResultOld;
+
 import com.example.demo.dto.VerifyCodeRequest;
 import com.example.demo.exception.ApiException;
 import com.example.demo.service.UserService;

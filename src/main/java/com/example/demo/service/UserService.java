@@ -2,7 +2,6 @@ package com.example.demo.service;
 
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -29,7 +28,6 @@ import com.example.demo.enums.AccountStatus;
 import com.example.demo.exception.ApiException;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.response.SuccessResponse;
-import com.example.demo.utils.AuthUtil;
 import com.example.demo.utils.EmailJwtUtil;
 import com.example.demo.utils.FileUpoladUtil;
 import com.example.demo.utils.HashUtil;
