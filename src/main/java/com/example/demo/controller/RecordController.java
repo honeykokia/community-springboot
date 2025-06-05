@@ -3,10 +3,12 @@ package com.example.demo.controller;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.bean.RecordBean;
+import com.example.demo.dto.ErrorResult;
 import com.example.demo.dto.RecordRequest;
 import com.example.demo.dto.ValidationResultOld;
 import com.example.demo.exception.ApiException;
 import com.example.demo.service.RecordService;
+import com.example.demo.utils.AuthUtil;
 
 import java.time.LocalDate;
 
@@ -37,29 +39,31 @@ public class RecordController {
         @RequestParam(defaultValue = "10") int size ,
         @RequestParam LocalDate startDate,
         @RequestParam LocalDate endDate) {
-    
-        return recordService.getRecordByAccountId(accountId, page , size ,startDate, endDate);
+            
+        Long userId = AuthUtil.getCurrentUserId();
+        return recordService.getRecordByAccountId(userId , accountId, page , size ,startDate, endDate);
     }
 
     @PostMapping
-    public ResponseEntity<?> addRecord(@PathVariable Long accountId , @RequestBody RecordRequest request) {
-
-        ValidationResultOld<RecordBean> result = recordService.checkRecord(accountId,request);
-        if (result.getErrors().isPresent()) {
-            throw new ApiException(result.getErrors().get());
+    public ResponseEntity<?> saveRecord(@PathVariable Long accountId , @RequestBody RecordRequest request) {
+        Long userId = AuthUtil.getCurrentUserId();
+        ErrorResult result = recordService.checkRecord(userId,accountId,request);
+        if (result.hasErrors()) {
+            throw new ApiException(result.getErrors());
         }
-        return recordService.saveRecord(accountId,request);
+        return recordService.saveRecord(userId,accountId,request);
     }
 
     @PutMapping("/{recordId}")
     public ResponseEntity<?> updateRecord(@PathVariable Long accountId, @PathVariable Long recordId , @RequestBody RecordRequest request) {
-        
-        return recordService.updateRecord(accountId,recordId,request);
+        Long userId = AuthUtil.getCurrentUserId();
+        return recordService.updateRecord(userId,accountId,recordId,request);
     }
 
     @DeleteMapping("/{recordId}")
     public ResponseEntity<?> deleteRecord(@PathVariable Long accountId , @PathVariable Long recordId) {
-        return recordService.deleteRecord(accountId,recordId);
+        Long userId = AuthUtil.getCurrentUserId();
+        return recordService.deleteRecord(userId,accountId,recordId);
     }
     
 
