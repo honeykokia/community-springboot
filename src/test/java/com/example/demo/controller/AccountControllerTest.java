@@ -83,7 +83,6 @@ public class AccountControllerTest {
         ErrorResult result = new ErrorResult();
 
 
-
         when(accountService.checkAccount(any(),any()))
                 .thenReturn(result);
         when(accountService.addAccount(any()))
