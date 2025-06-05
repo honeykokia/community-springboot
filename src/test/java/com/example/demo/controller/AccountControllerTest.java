@@ -19,13 +19,11 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import org.springframework.http.MediaType;
 
 import com.example.demo.bean.AccountBean;
 import com.example.demo.dto.ErrorResult;
-import com.example.demo.dto.ValidationResultOld;
 import com.example.demo.response.SuccessResponse;
 import com.example.demo.service.AccountService;
 import com.example.demo.service.CategoryService;
