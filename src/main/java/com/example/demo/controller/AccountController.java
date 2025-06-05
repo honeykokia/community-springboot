@@ -42,10 +42,10 @@ public class AccountController {
     public ResponseEntity<?> addAccount(@RequestBody AccountRequest request) {
 
         Long userId = AuthUtil.getCurrentUserId();
-        ErrorResult errors = accountService.checkAccount(userId,request);
+        ErrorResult result = accountService.checkAccount(userId,request);
 
-        if(errors.hasErrors()){
-            throw new ApiException(errors.getErrors());
+        if(result.hasErrors()){
+            throw new ApiException(result.getErrors());
         }
 
         return accountService.addAccount(request);

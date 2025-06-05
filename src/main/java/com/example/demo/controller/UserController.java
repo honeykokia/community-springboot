@@ -49,23 +49,21 @@ public class UserController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
-        Long userId = AuthUtil.getCurrentUserId();
-        ErrorResult errors = userService.loginCheck(request);
-
-        if (errors.hasErrors()) {
-            throw new ApiException(errors.getErrors());
+        
+        ErrorResult result = userService.loginCheck(request);
+        if (result.hasErrors()) {
+            throw new ApiException(result.getErrors());
         }
-
-        return userService.loginCreateToken(userId);
+        return userService.loginCreateToken(request.getEmail());
     }
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
 
-        ErrorResult errors = userService.registerCheck(request);
+        ErrorResult result = userService.registerCheck(request);
     
-        if (errors.hasErrors()) {
-            throw new ApiException(errors.getErrors());
+        if (result.hasErrors()) {
+            throw new ApiException(result.getErrors());
         }
         return userService.registerSave(request);
 
@@ -73,9 +71,9 @@ public class UserController {
 
     @GetMapping("/verify")
     public RedirectView verify(@RequestParam String token) {
-        ErrorResult errors = userService.verifyEmail(token);
-        if (errors.hasErrors()) {
-            String message = errors.getErrors().get("email");
+        ErrorResult result = userService.verifyEmail(token);
+        if (result.hasErrors()) {
+            String message = result.getErrors().get("email");
             message = URLEncoder.encode(message, StandardCharsets.UTF_8);
             return new RedirectView(frontEndHost + "/projectA/verifyFail?message=" + message); // Redirect to a different URL
         }
@@ -108,10 +106,10 @@ public class UserController {
     public ResponseEntity<?> memberPasswordUpdate(@RequestBody PasswordRequest request) {
 
         Long userId = AuthUtil.getCurrentUserId();
-        ErrorResult errors = userService.updatePasswordCheck(userId,request);
+        ErrorResult result = userService.updatePasswordCheck(userId,request);
 
-        if (errors.hasErrors()) {
-            throw new ApiException(errors.getErrors());
+        if (result.hasErrors()) {
+            throw new ApiException(result.getErrors());
         }
 
         return userService.updatePassword(userId,request.getPassword());

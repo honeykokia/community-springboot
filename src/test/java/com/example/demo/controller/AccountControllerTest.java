@@ -24,6 +24,7 @@ import java.util.Optional;
 import org.springframework.http.MediaType;
 
 import com.example.demo.bean.AccountBean;
+import com.example.demo.dto.ErrorResult;
 import com.example.demo.dto.ValidationResultOld;
 import com.example.demo.response.SuccessResponse;
 import com.example.demo.service.AccountService;
@@ -61,11 +62,10 @@ public class AccountControllerTest {
                 "id", 1L,
                 "email", "test@example.com",
                 "created_at", LocalDateTime.now()));
-        ValidationResultOld<AccountBean> validationResult = new ValidationResultOld<>();
-        validationResult.setErrors(Optional.empty());
+        ErrorResult result = new ErrorResult();
 
-        when(accountService.checkAccount(any()))
-                .thenReturn(validationResult);
+        when(accountService.checkAccount(any(),any()))
+                .thenReturn(result);
         when(accountService.addAccount(any()))
                 .thenReturn((ResponseEntity<SuccessResponse>) ResponseEntity.ok(response));
 

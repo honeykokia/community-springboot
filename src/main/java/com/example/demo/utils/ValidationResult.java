@@ -27,7 +27,7 @@ public class ValidationResult {
     }
     
     public void compareinputAndDbPassword(String fieldName , String userPassword, String inputPassword , String message){
-        if((userPassword.isBlank() || inputPassword.isBlank()) || !userPassword.equals(inputPassword) || !HashUtil.matches(inputPassword, userPassword)){
+        if((userPassword.isBlank() || inputPassword.isBlank()) || !HashUtil.matches(inputPassword, userPassword)){
             errors.add(fieldName, message);
         }
     }

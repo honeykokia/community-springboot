@@ -124,13 +124,9 @@ public class UserService {
 
     }
 
-    public ResponseEntity<?> loginCreateToken(Long userId) {
+    public ResponseEntity<?> loginCreateToken(String email) {
 
-        if (userId == null) {
-            throw new ApiException(Map.of("email", "更新異常，請重新登入"));
-        }
-
-        Optional<UserBean> userOpt = userRepo.findById(userId);
+        Optional<UserBean> userOpt = userRepo.findByEmail(email);
         if (userOpt.isEmpty()) {
             throw new ApiException(Map.of("email", "更新異常，請重新登入"));
         }
