@@ -3,12 +3,17 @@ package com.example.demo.controller;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.MockMvc;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -53,6 +58,21 @@ public class AccountControllerTest {
     @MockBean
     private UserService userService;
 
+    @BeforeEach
+    void setupAuth() {
+        Long fakeUserId = 123L;
+
+        Authentication auth = new UsernamePasswordAuthenticationToken(
+                fakeUserId, null, List.of());
+
+        SecurityContextHolder.getContext().setAuthentication(auth);
+    }
+
+    @AfterEach
+    void clearAuth() {
+        SecurityContextHolder.clearContext();
+    }
+
     @Test
     void should_return_ok_when_account_added() throws Exception {
 
@@ -61,6 +81,8 @@ public class AccountControllerTest {
                 "email", "test@example.com",
                 "created_at", LocalDateTime.now()));
         ErrorResult result = new ErrorResult();
+
+
 
         when(accountService.checkAccount(any(),any()))
                 .thenReturn(result);
