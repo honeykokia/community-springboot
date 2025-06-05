@@ -14,7 +14,8 @@ import org.springframework.web.multipart.MultipartFile;
 import com.example.demo.bean.AccountBean;
 import com.example.demo.bean.UserBean;
 import com.example.demo.dto.AccountRequest;
-import com.example.demo.dto.ValidationResult;
+import com.example.demo.dto.ErrorResult;
+import com.example.demo.dto.ValidationResultOld;
 import com.example.demo.enums.AccountStatus;
 import com.example.demo.exception.ApiException;
 import com.example.demo.repository.AccountRepository;
@@ -22,7 +23,10 @@ import com.example.demo.repository.UserRepository;
 import com.example.demo.response.SuccessResponse;
 import com.example.demo.utils.AuthUtil;
 import com.example.demo.utils.FileUpoladUtil;
+import com.example.demo.utils.ValidationResult;
 import com.example.demo.utils.ValidationUtils;
+
+import lombok.val;
 
 @Service
 public class AccountService {
@@ -33,26 +37,24 @@ public class AccountService {
     @Autowired
     private UserRepository userRepo;
 
-    public ValidationResult<AccountBean> checkAccount(AccountRequest request) {
-        Long userId = AuthUtil.getCurrentUserId();
-        ValidationResult<AccountBean> result = new ValidationResult<>();
-        Map<String, String> errors = new HashMap<>();
+    public ErrorResult checkAccount(Long userId , AccountRequest request) {
+        
+        ValidationResult vaildator = new ValidationResult();
 
         Optional<UserBean> userOpt = userRepo.findById(userId);
         if (userOpt.isEmpty()) {
-            return ValidationResult.failFast("user", "使用者不存在");
+            return vaildator.failFast("user", "使用者不存在");
         }
 
-        ValidationUtils.checkIsBlank(errors, "name", request.getName(), "請輸入帳號名稱");
-        ValidationUtils.checkIsBlank(errors, "description", request.getDescription(), "請輸入帳號描述");
-        ValidationUtils.checkNull(errors,"initialAmount", request.getInitialAmount(), "請輸入金額");
+        vaildator.checkIsBlank("name", request.getName(), "請輸入帳號名稱");
+        vaildator.checkIsBlank("description", request.getDescription(), "請輸入帳號描述");
+        vaildator.checkNull("initialAmount", request.getInitialAmount(), "請輸入金額");
 
-        
         UserBean user = userOpt.get();
         List<AccountBean> existingAccounts = user.getAccounts();
         for (AccountBean account : existingAccounts){
             if(account.getName().equals(request.getName()) && account.getAccountStatus() == AccountStatus.ACTIVE){
-                errors.put("name", "帳戶名稱已存在");
+                vaildator.getErrors().add("name", "帳戶名稱已存在");
                 break;
             }
         }
@@ -60,20 +62,12 @@ public class AccountService {
         List<AccountBean> accountList = accountRepo.findAllByUserIdAndStatus(userId,AccountStatus.ACTIVE.getCode());
 
         if(accountList.size() >= 5) {
-            errors.put("name", "帳戶數量已達上限");
+            vaildator.getErrors().add("name", "帳戶數量已達上限");
         }
         
+        vaildator.checkIsNegative("initialAmount", request.getInitialAmount(), "金額不能小於0");
 
-        ValidationUtils.checkIsNegative(errors, "initialAmount", request.getInitialAmount(), "金額不能小於0");
-
-        if (errors.isEmpty()){
-            result.setErrors(Optional.empty());
-        }else{
-            result.setErrors(Optional.of(errors));
-        }
-        result.setTarget(null);
-
-        return result;
+        return vaildator.getErrors();
     }
 
     public ResponseEntity<SuccessResponse> getAllAccount(){
@@ -121,9 +115,8 @@ public class AccountService {
 
     }
 
-    public ResponseEntity<?> getAccountById(Long accountId) {
-        Long userId = AuthUtil.getCurrentUserId();
-        
+    public ResponseEntity<?> getAccountById(Long userId,Long accountId) {
+
         Optional<AccountBean> accountOpt = accountRepo.findByIdAndUserIdAndStatus(accountId, userId, AccountStatus.ACTIVE.getCode());
 
         
@@ -133,8 +126,7 @@ public class AccountService {
         return ResponseEntity.ok(response);
     }
 
-    public ResponseEntity<?> updateAccountById(Long accountId, AccountRequest request , MultipartFile file) {
-        Long userId = AuthUtil.getCurrentUserId();
+    public ResponseEntity<?> updateAccountById(Long userId , Long accountId, AccountRequest request , MultipartFile file) {
         Optional<AccountBean> accountOpt = accountRepo.findByIdAndUserIdAndStatus(accountId, userId, AccountStatus.ACTIVE.getCode());
 
         if (accountOpt.isEmpty()) {
@@ -164,8 +156,8 @@ public class AccountService {
         return ResponseEntity.ok(response); 
     }
 
-    public ResponseEntity<?> deleteAccountById(Long accountId) {
-        Long userId = AuthUtil.getCurrentUserId();
+    public ResponseEntity<?> deleteAccountById(Long userId ,Long accountId) {
+        
         Optional<AccountBean> accountOpt = accountRepo.findByIdAndUserIdAndStatus(accountId, userId, AccountStatus.ACTIVE.getCode());
 
         if (accountOpt.isEmpty()) {

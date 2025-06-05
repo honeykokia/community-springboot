@@ -18,12 +18,12 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.example.demo.bean.AccountBean;
 import com.example.demo.bean.UserBean;
+import com.example.demo.dto.ErrorResult;
 import com.example.demo.dto.LoginRequest;
 import com.example.demo.dto.MemberRequest;
 import com.example.demo.dto.PasswordRequest;
 import com.example.demo.dto.RegisterRequest;
 import com.example.demo.dto.ResetPasswordRequest;
-import com.example.demo.dto.ValidationResult;
 import com.example.demo.dto.VerifyCodeRequest;
 import com.example.demo.enums.AccountStatus;
 import com.example.demo.exception.ApiException;
@@ -31,13 +31,11 @@ import com.example.demo.repository.UserRepository;
 import com.example.demo.response.SuccessResponse;
 import com.example.demo.utils.AuthUtil;
 import com.example.demo.utils.EmailJwtUtil;
-import com.example.demo.utils.EmailVaildator;
 import com.example.demo.utils.FileUpoladUtil;
+import com.example.demo.utils.HashUtil;
 import com.example.demo.utils.JwtUtil;
 import com.example.demo.utils.PasswordVaildator;
-import com.example.demo.utils.ValidationUtils;
-
-
+import com.example.demo.utils.ValidationResult;
 
 @Service
 public class UserService {
@@ -60,107 +58,79 @@ public class UserService {
     @Value("${app.base-url}")
     private String baseUrl;
 
-    public ValidationResult<UserBean> loginCheck(LoginRequest request) {
+    public ErrorResult loginCheck(LoginRequest request) {
 
-        ValidationResult<UserBean> result = new ValidationResult<UserBean>();
-        HashMap<String,String> errors = new HashMap<String,String>();
         Optional<UserBean> userOpt = userRepo.findByEmail(request.getEmail());
+        ValidationResult validator = new ValidationResult();
 
-
-        if(userOpt.isEmpty()) {
-            return ValidationResult.failFast("email", "帳號或密碼錯誤");
+        if (userOpt.isEmpty()) {
+            return validator.failFast("email", "帳號或密碼錯誤");
         }
 
         UserBean user = userOpt.get();
 
-        if(user.getAccountStatus().equals(AccountStatus.UNVERIFIED)){
-            return ValidationResult.failFast("verify", "此信箱尚未驗證，請至信箱收取驗證信");
+        if (user.getAccountStatus().equals(AccountStatus.UNVERIFIED)) {
+            return validator.failFast("email", "帳號尚未驗證，請至信箱收取驗證信");
         }
 
-        ValidationUtils.checkIsBlank(errors, "email", request.getEmail(), "請輸入信箱");
-        ValidationUtils.checkIsBlank(errors, "password", request.getPassword(), "請輸入密碼");
-        ValidationUtils.comparePassword(errors, "password", user.getPassword(), request.getPassword(), "帳號或密碼錯誤");
-    
-        if(errors.isEmpty()){
-            result.setErrors(Optional.empty());
-        }else{
-            result.setErrors(Optional.of(errors));
-        }
-        result.setTarget(user);
+        validator.checkIsBlank("email", request.getEmail(), "請輸入信箱");
+        validator.checkIsBlank("password", request.getPassword(), "請輸入密碼");
+        validator.compareinputAndDbPassword("password", user.getPassword(), request.getPassword(), "帳號或密碼錯誤");
 
-        return result;
+        return validator.getErrors();
     }
 
-    public ValidationResult<UserBean> registerCheck(RegisterRequest request) {
+    public ErrorResult registerCheck(RegisterRequest request) {
 
-        ValidationResult<UserBean> result = new ValidationResult<UserBean>();
-        HashMap<String,String> errors = new HashMap<String,String>();
+        ValidationResult validator = new ValidationResult();
         Optional<UserBean> userOpt = userRepo.findByEmail(request.getEmail());
 
-        
-        if(userOpt.isPresent()) {
-            errors.put("email", "此信箱已被註冊");
+        if (userOpt.isPresent()) {
+            validator.getErrors().add("email", "此信箱已被註冊");
         }
 
-        ValidationUtils.checkIsBlank(errors, "name", request.getName(), "請輸入姓名");
-        ValidationUtils.checkNull(errors, "birthday", request.getBirthday(), "請輸入生日");
-        ValidationUtils.checkIsBlank(errors,"gender", request.getGender(), "請輸入性別");
-        ValidationUtils.checkIsBlank(errors, "email", request.getEmail(), "請輸入信箱");
-        ValidationUtils.checkIsBlank(errors, "password", request.getPassword(), "請輸入密碼");
-        ValidationUtils.checkIsBlank(errors, "confirmPassword", request.getConfirmPassword(), "請輸入確認密碼");
-        ValidationUtils.comparePassword(errors, "confirmPassword", request.getPassword(), request.getConfirmPassword(), "確認密碼不一致");
-        ValidationUtils.passwordVaildator(errors, "password", request.getPassword(), "密碼格式不符合，必須要有大小寫英文及數字，且長度要大於8小於12");
+        validator.checkIsBlank("name", request.getName(), "請輸入姓名");
+        validator.checkNull("birthday", request.getBirthday(), "請輸入生日");
+        validator.checkIsBlank("gender", request.getGender(), "請輸入性別");
+        validator.checkIsBlank("email", request.getEmail(), "請輸入信箱");
+        validator.checkIsBlank("password", request.getPassword(), "請輸入密碼");
+        validator.checkIsBlank("confirmPassword", request.getConfirmPassword(), "請輸入確認密碼");
+        validator.comparePassword("confirmPassword", request.getPassword(), request.getConfirmPassword(), "確認密碼不一致");
+        validator.passwordVaildator("password", request.getPassword(), "密碼格式不符合，必須要有大小寫英文及數字，且長度要大於8小於12");
+        validator.checkMailformat("email", request.getEmail(), "信箱格式不符合");
+        validator.checkBirthdayFormat("birthday", request.getBirthday(), "生日不可大於今天");
 
-        if(!EmailVaildator.isValidEmail(request.getEmail())) {
-            errors.put("email", "信箱格式不符合");
-        }
-
-        if(request.getBirthday().isAfter(java.time.LocalDate.now())) {
-            errors.put("birthday", "生日不可大於今天");
-        }
-
-        if(errors.isEmpty()){
-            result.setErrors(Optional.empty());
-        }else{
-            result.setErrors(Optional.of(errors));
-        }
-        result.setTarget(null);
-
-        return result;
+        return validator.getErrors();
     }
 
-    public ValidationResult<UserBean> updatePasswordCheck(PasswordRequest request){
-
-        Long userId = AuthUtil.getCurrentUserId();
-
-        ValidationResult<UserBean> result = new ValidationResult<UserBean>();
-        HashMap<String,String> errors = new HashMap<String,String>();
+    public ErrorResult updatePasswordCheck(Long userId, PasswordRequest request) {
+        ValidationResult validator = new ValidationResult();
         Optional<UserBean> userOpt = userRepo.findById(userId);
 
-        if(userOpt.isEmpty()) {
-            return ValidationResult.failFast("oldPassword", "查無此會員");
+        if (userOpt.isEmpty()) {
+            validator.getErrors().add("email", "更新異常，請重新登入");
+            return validator.getErrors();
         }
 
         UserBean user = userOpt.get();
-        ValidationUtils.checkIsBlank(errors, "oldPassword", request.getOldPassword(), "請輸入舊密碼");
-        ValidationUtils.checkIsBlank(errors, "password", request.getPassword(), "請輸入新密碼");
-        ValidationUtils.checkIsBlank(errors, "confirmPassword", request.getConfirmPassword(), "請輸入確認密碼");
-        ValidationUtils.comparePassword(errors, "oldPassword", user.getPassword(), request.getOldPassword(), "舊密碼錯誤");
-        ValidationUtils.comparePassword(errors, "confirmPassword", request.getPassword(), request.getConfirmPassword(), "確認密碼不一致");
-        ValidationUtils.passwordVaildator(errors, "password", request.getPassword(), "密碼格式不符合，必須要有大小寫英文及數字，且長度要大於8小於12");
+        validator.checkIsBlank("oldPassword", request.getOldPassword(), "請輸入舊密碼");
+        validator.checkIsBlank("password", request.getPassword(), "請輸入新密碼");
+        validator.checkIsBlank("confirmPassword", request.getConfirmPassword(), "請輸入確認密碼");
+        validator.compareinputAndDbPassword("oldPassword", request.getOldPassword(), user.getPassword(), "舊密碼錯誤");
+        validator.comparePassword("confirmPassword", request.getPassword(), request.getConfirmPassword(), "確認密碼不一致");
+        validator.passwordVaildator("password", request.getPassword(), "密碼格式不符合，必須要有大小寫英文及數字，且長度要大於8小於12");
 
-        if (errors.isEmpty()) {
-            result.setErrors(Optional.empty());
-        }else{
-            result.setErrors(Optional.of(errors));
-        }
-        result.setTarget(user);
-
-        return result;
+        return validator.getErrors();
 
     }
 
-    public ResponseEntity<?> loginCreateToken(UserBean user) {
+    public ResponseEntity<?> loginCreateToken(String email) {
+
+        Optional<UserBean> userOpt = userRepo.findByEmail(email);
+        if (userOpt.isEmpty()) {
+            throw new ApiException(Map.of("email", "更新異常，請重新登入"));
+        }
+        UserBean user = userOpt.get();
 
         String token = jwtUtil.generateToken(user.getEmail(), user.getId());
         SuccessResponse response = new SuccessResponse(Map.of(
@@ -168,7 +138,7 @@ public class UserService {
                 "image", user.getImage(),
                 "id", user.getId(),
                 "email", user.getEmail(),
-                "name" , user.getName(),
+                "name", user.getName(),
                 "created_at", user.getCreatedAt()));
 
         return ResponseEntity.ok(response);
@@ -185,13 +155,12 @@ public class UserService {
         account.setAccountStatus(AccountStatus.ACTIVE);
         account.setIsPublic(false);
         account.setCreatedAt(java.time.LocalDateTime.now());
-        
 
         user.setName(request.getName());
         user.setBirthday(request.getBirthday());
         user.setGender(request.getGender());
         user.setEmail(request.getEmail());
-        user.setPassword(request.getPassword());
+        user.setPassword(HashUtil.encode(request.getPassword()));
         user.setImage("/uploads/defaultAvatar.jpg");
         user.setRole((byte) 1);
         user.setAccountStatus(AccountStatus.UNVERIFIED);
@@ -202,71 +171,62 @@ public class UserService {
         userRepo.save(user);
 
         String token = emailJwtUtil.generateToken(user.getEmail(), user.getId());
-        String verifyUrl= baseUrl + "/user/verify?token=" + token;
+        String verifyUrl = baseUrl + "/user/verify?token=" + token;
         emailService.sendEmailByRegister(user.getEmail(), verifyUrl);
 
         SuccessResponse response = new SuccessResponse(Map.of(
-            "id", user.getId(),
-            "email", user.getEmail(),
-            "created_at", user.getCreatedAt()));
+                "id", user.getId(),
+                "email", user.getEmail(),
+                "created_at", user.getCreatedAt()));
 
         return ResponseEntity.ok(response);
     }
 
-    public ValidationResult<UserBean> verifyEmail(String token) {
+    public ErrorResult verifyEmail(String token) {
 
-        ValidationResult<UserBean> result = new ValidationResult<UserBean>();
-        HashMap<String,String> errors = new HashMap<String,String>();
-
+        ValidationResult validator = new ValidationResult();
         String email = emailJwtUtil.getEmailFromToken(token);
         Optional<UserBean> optUser = userRepo.findByEmail(email);
 
-        if(emailJwtUtil.isTokenExpired(token)){
-           return ValidationResult.failFast("email", "驗證連結已過期，請重新接收驗證信❌❌");
+        if (emailJwtUtil.isTokenExpired(token)) {
+            return validator.failFast("email", "驗證連結已過期，請重新接收驗證信❌❌");
         }
 
-        if(optUser.isEmpty()){
-            return ValidationResult.failFast("email", "查無此會員");
+        if (optUser.isEmpty()) {
+            return validator.failFast("email", "查無此會員");
         }
         UserBean user = optUser.get();
 
-        if(user.getAccountStatus().equals(AccountStatus.ACTIVE)){
-            return ValidationResult.failFast("email", "此信箱已驗證過👋👋");
+        if (user.getAccountStatus().equals(AccountStatus.ACTIVE)) {
+            return validator.failFast("email", "此信箱已驗證過👋👋");
         }
-        
+
         user.setAccountStatus(AccountStatus.ACTIVE);
         userRepo.save(user);
 
-        if(errors.isEmpty()){
-            result.setErrors(Optional.empty());
-        }else{
-            result.setErrors(Optional.of(errors));
-        }
-        result.setTarget(user);
-
-        return result;
+        return validator.getErrors();
     }
 
     public ResponseEntity<?> resendMail(String email) {
 
         Optional<UserBean> optUser = userRepo.findByEmail(email);
-        if(optUser.isEmpty()){
+        if (optUser.isEmpty()) {
             throw new ApiException(Map.of("email", "查無此會員"));
         }
 
-        if(optUser.get().getAccountStatus().equals(AccountStatus.ACTIVE)){
+        if (optUser.get().getAccountStatus().equals(AccountStatus.ACTIVE)) {
             throw new ApiException(Map.of("email", "此信箱已驗證過👋👋"));
         }
 
         String key = "verify:cooldown:" + email;
-        if(redisTemplate.hasKey(key)){
+        if (redisTemplate.hasKey(key)) {
             throw new ApiException(Map.of("email", "請稍後再試，驗證信已發送過"));
         }
 
         UserBean user = optUser.get();
 
         String newtoken = emailJwtUtil.generateToken(user.getEmail(), user.getId());
-        String verifyUrl= baseUrl + "/user/verify?token=" + newtoken;
+        String verifyUrl = baseUrl + "/user/verify?token=" + newtoken;
         emailService.sendEmailByRegister(user.getEmail(), verifyUrl);
         redisTemplate.opsForValue().set(key, "1", Duration.ofMinutes(3));
 
@@ -274,16 +234,11 @@ public class UserService {
         return ResponseEntity.ok(response);
     }
 
-    public ResponseEntity<?> getMemberProfile() {
-
-        Long userId = AuthUtil.getCurrentUserId();
-        if (userId == null){
-            throw new ApiException(Map.of("general", "查無此會員"));
-        }
+    public ResponseEntity<?> getMemberProfile(Long userId) {
 
         Optional<UserBean> optUser = userRepo.findById(userId);
         UserBean userBean = new UserBean();
-        if(optUser.isEmpty()){
+        if (optUser.isEmpty()) {
             throw new ApiException(Map.of("general", "查無此會員"));
         }
 
@@ -301,12 +256,13 @@ public class UserService {
         return ResponseEntity.ok(response);
     }
 
-    public ResponseEntity<?> updateMemberProfile(MemberRequest request, MultipartFile file) {
-        Long userId = AuthUtil.getCurrentUserId();
+    public ResponseEntity<?> updateMemberProfile(Long userId , MemberRequest request, MultipartFile file) {
+
         Optional<UserBean> optUser = userRepo.findById(userId);
-        if(optUser.isEmpty()){
+        if (optUser.isEmpty()) {
             throw new ApiException(Map.of("email", "更新異常，請重新登入"));
         }
+
         UserBean userBean = new UserBean();
         userBean = optUser.get();
         userBean.setName(request.getName());
@@ -314,17 +270,22 @@ public class UserService {
         userBean.setPassword(request.getPassword());
 
         String image = FileUpoladUtil.uploadFile(file);
-        if (!image.equals("")){
+        if (!image.equals("")) {
             userBean.setImage(image);
         }
-        
+
         userRepo.save(userBean);
 
         SuccessResponse response = new SuccessResponse(null);
         return ResponseEntity.ok(response);
     }
 
-    public ResponseEntity<?> updatePassword(UserBean user , String password) {
+    public ResponseEntity<?> updatePassword(Long userId, String password) {
+        Optional<UserBean> optUser = userRepo.findById(userId);
+        if (optUser.isEmpty()) {
+            throw new ApiException(Map.of("email", "更新異常，請重新登入"));
+        }
+        UserBean user = optUser.get();
         user.setPassword(password);
         userRepo.save(user);
 
@@ -334,7 +295,7 @@ public class UserService {
 
     public ResponseEntity<?> forgetPassword(String email) {
         Optional<UserBean> optUser = userRepo.findByEmail(email);
-        if(optUser.isEmpty()){
+        if (optUser.isEmpty()) {
             throw new ApiException(Map.of("email", "請確認信箱是否正確"));
         }
 
@@ -343,11 +304,11 @@ public class UserService {
         String key = "forget:password:" + email;
         String verifyToken = emailJwtUtil.generateToken(user.getEmail(), user.getId());
 
-        if(redisTemplate.hasKey(key)){
+        if (redisTemplate.hasKey(key)) {
             throw new ApiException(Map.of("email", "請稍後再試，驗證信已發送過"));
         }
 
-        redisTemplate.opsForValue().set(key, code, 5,TimeUnit.MINUTES);
+        redisTemplate.opsForValue().set(key, code, 5, TimeUnit.MINUTES);
         emailService.sendEmailByForgetPassword(email, code);
 
         SuccessResponse response = new SuccessResponse(Map.of("verifyToken", verifyToken));
@@ -356,22 +317,22 @@ public class UserService {
 
     public ResponseEntity<?> verifyCode(VerifyCodeRequest request) {
 
-        String email= emailJwtUtil.getEmailFromToken(request.getVerifyToken());
+        String email = emailJwtUtil.getEmailFromToken(request.getVerifyToken());
         Optional<UserBean> optUser = userRepo.findByEmail(email);
 
-        if(optUser.isEmpty()){
+        if (optUser.isEmpty()) {
             throw new ApiException(Map.of("token", "驗證失敗，請重新操作"));
         }
         UserBean user = optUser.get();
-        
+
         String key = "forget:password:" + email;
         String correctCode = redisTemplate.opsForValue().get(key);
 
-        if(correctCode == null){
+        if (correctCode == null) {
             throw new ApiException(Map.of("code", "驗證碼已過期，請重新接收驗證信"));
         }
 
-        if(!correctCode.equals(request.getCode())){
+        if (!correctCode.equals(request.getCode())) {
             throw new ApiException(Map.of("code", "驗證碼錯誤，請重新輸入"));
         }
 
@@ -386,20 +347,20 @@ public class UserService {
     public ResponseEntity<?> resetPassword(ResetPasswordRequest request) {
         String email = emailJwtUtil.getEmailFromToken(request.getResetToken());
         Optional<UserBean> optUser = userRepo.findByEmail(email);
-        if(optUser.isEmpty()){
-            throw new ApiException(Map.of("email", "請確認信箱是否正確"));
+        if (optUser.isEmpty()) {
+            throw new ApiException(Map.of("email", "更新異常，請重新登入"));
         }
         UserBean user = optUser.get();
 
-        if(emailJwtUtil.isTokenExpired(request.getResetToken())){
+        if (emailJwtUtil.isTokenExpired(request.getResetToken())) {
             throw new ApiException(Map.of("email", "驗證已過期，請重新接收驗證碼"));
         }
 
-        if(!PasswordVaildator.isValidPassword(request.getPassword())){
+        if (!PasswordVaildator.isValidPassword(request.getPassword())) {
             throw new ApiException(Map.of("password", "密碼格式不符合，必須要有大小寫英文及數字，且長度要大於8小於12"));
         }
 
-        if(!request.getPassword().equals(request.getConfirmPassword())){
+        if (!request.getPassword().equals(request.getConfirmPassword())) {
             throw new ApiException(Map.of("confirmPassword", "確認密碼不一致"));
         }
 
@@ -410,5 +371,3 @@ public class UserService {
         return ResponseEntity.ok(response);
     }
 }
-
-

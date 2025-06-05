@@ -4,6 +4,7 @@ import java.util.Map;
 
 public class ValidationUtils {
 
+
     public static void checkIsBlank(Map<String, String> errors, String fieldName, String value, String message) {
         if (value == null || value.isBlank()) {
             errors.put(fieldName, message);
@@ -16,8 +17,14 @@ public class ValidationUtils {
         }
     }
 
-    public static void comparePassword(Map<String,String> errors , String fieldName , String onePassword, String twoPassword , String message){
-        if((onePassword.isBlank() || twoPassword.isBlank()) || !onePassword.equals(twoPassword)){
+    public static void comparePassword(Map<String,String> errors , String fieldName , String userPassword, String inputPassword , String message){
+        if((userPassword.isBlank() || inputPassword.isBlank()) || !userPassword.equals(inputPassword)){
+            errors.put(fieldName, message);
+        }
+    }
+    
+    public static void compareinputAndDbPassword(Map<String,String> errors , String fieldName , String userPassword, String inputPassword , String message){
+        if((userPassword.isBlank() || inputPassword.isBlank()) || !userPassword.equals(inputPassword) || !HashUtil.matches(inputPassword, userPassword)){
             errors.put(fieldName, message);
         }
     }

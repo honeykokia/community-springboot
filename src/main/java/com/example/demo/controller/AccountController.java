@@ -6,10 +6,11 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.example.demo.bean.AccountBean;
 import com.example.demo.dto.AccountRequest;
-import com.example.demo.dto.ValidationResult;
+import com.example.demo.dto.ErrorResult;
+import com.example.demo.dto.ValidationResultOld;
 import com.example.demo.exception.ApiException;
 import com.example.demo.service.AccountService;
-
+import com.example.demo.utils.AuthUtil;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -39,10 +40,12 @@ public class AccountController {
     
     @PostMapping
     public ResponseEntity<?> addAccount(@RequestBody AccountRequest request) {
-        ValidationResult<AccountBean> result = accountService.checkAccount(request);
 
-        if(result.getErrors().isPresent()){
-            throw new ApiException(result.getErrors().get());
+        Long userId = AuthUtil.getCurrentUserId();
+        ErrorResult result = accountService.checkAccount(userId,request);
+
+        if(result.hasErrors()){
+            throw new ApiException(result.getErrors());
         }
 
         return accountService.addAccount(request);
@@ -50,19 +53,20 @@ public class AccountController {
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getAccountById(@PathVariable("id") Long accountId) {
-
-        return accountService.getAccountById(accountId);
+        Long userId = AuthUtil.getCurrentUserId();
+        return accountService.getAccountById(userId,accountId);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateAccountById(@PathVariable Long id, @RequestPart("data") AccountRequest request, @RequestPart(value = "file" , required = false) MultipartFile file) {
-
-        return accountService.updateAccountById(id, request, file);
+    public ResponseEntity<?> updateAccountById(@PathVariable("id") Long accountId, @RequestPart("data") AccountRequest request, @RequestPart(value = "file" , required = false) MultipartFile file) {
+        Long userId = AuthUtil.getCurrentUserId();
+        return accountService.updateAccountById(userId, accountId, request, file);
     }
     
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteAccountById(@PathVariable Long id) {
-        return accountService.deleteAccountById(id);
+    public ResponseEntity<?> deleteAccountById(@PathVariable("id") Long accountId) {
+        Long userId = AuthUtil.getCurrentUserId();
+        return accountService.deleteAccountById(userId, accountId);
     }
     
 }
