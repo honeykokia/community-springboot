@@ -6,6 +6,7 @@ import static org.mockito.Mockito.when;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -32,11 +33,12 @@ import com.example.demo.dto.ErrorResult;
 import com.example.demo.response.SuccessResponse;
 import com.example.demo.service.AccountService;
 import com.example.demo.service.CategoryService;
+import com.example.demo.service.RateLimitService;
 import com.example.demo.service.RecordService;
 import com.example.demo.service.UserService;
 import com.example.demo.utils.JwtUtil;
 
-@WebMvcTest
+@WebMvcTest // ⬅️ 只測試 AccountController
 @AutoConfigureMockMvc(addFilters = false) // ⬅️ 關掉 Security filter
 public class AccountControllerTest {
 
@@ -58,6 +60,10 @@ public class AccountControllerTest {
     @MockBean
     private UserService userService;
 
+    @MockBean
+    private RateLimitService rateLimitService;
+
+
     @BeforeEach
     void setupAuth() {
         Long fakeUserId = 123L;
@@ -66,6 +72,12 @@ public class AccountControllerTest {
                 fakeUserId, null, List.of());
 
         SecurityContextHolder.getContext().setAuthentication(auth);
+    }
+
+
+    @BeforeEach
+    void setUp() {
+    Mockito.when(rateLimitService.isAllowed(Mockito.any())).thenReturn(true);
     }
 
     @AfterEach
