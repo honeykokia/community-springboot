@@ -63,6 +63,7 @@ public class AccountControllerTest {
     @MockBean
     private RateLimitService rateLimitService;
 
+
     @BeforeEach
     void setupAuth() {
         Long fakeUserId = 123L;
@@ -72,6 +73,7 @@ public class AccountControllerTest {
 
         SecurityContextHolder.getContext().setAuthentication(auth);
     }
+
 
     @BeforeEach
     void setUp() {
