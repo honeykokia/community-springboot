@@ -22,6 +22,7 @@ import com.example.demo.bean.UserBean;
 import com.example.demo.dto.ErrorResult;
 import com.example.demo.dto.LoginRequest;
 import com.example.demo.dto.MemberRequest;
+import com.example.demo.dto.MemberResponse;
 import com.example.demo.dto.PasswordRequest;
 import com.example.demo.dto.RegisterRequest;
 import com.example.demo.dto.ResetPasswordRequest;
@@ -235,7 +236,7 @@ public class UserService {
     }
 
     @Cacheable(value = "memberProfile", key = "#userId")
-    public ResponseEntity<?> getMemberProfile(Long userId) {
+    public MemberResponse getMemberProfile(Long userId) {
 
         System.out.println("📦 查詢資料庫：userId = " + userId);
         Optional<UserBean> optUser = userRepo.findById(userId);
@@ -253,9 +254,14 @@ public class UserService {
             userBean.setGender("其他");
         }
 
-        SuccessResponse response = new SuccessResponse(userBean);
-
-        return ResponseEntity.ok(response);
+        MemberResponse memberResponse = new MemberResponse();
+        memberResponse.setName(userBean.getName());
+        memberResponse.setEmail(userBean.getEmail());
+        memberResponse.setBirthday(userBean.getBirthday());
+        memberResponse.setGender(userBean.getGender());
+        memberResponse.setImage(userBean.getImage());
+        
+        return memberResponse;
     }
 
     @CacheEvict(value = "memberProfile", key = "#userId")
