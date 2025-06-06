@@ -49,7 +49,7 @@ public class ValidationResult {
         }
     }
     public void checkBirthdayFormat(String fieldName, LocalDate birthday, String message) {
-        if (birthday == null || !birthday.isAfter(java.time.LocalDate.now())) {
+        if (birthday == null || birthday.isAfter(java.time.LocalDate.now())) {
             errors.add(fieldName, message);
         }
     }

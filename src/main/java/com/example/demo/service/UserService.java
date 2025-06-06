@@ -29,6 +29,7 @@ import com.example.demo.dto.ResetPasswordRequest;
 import com.example.demo.dto.VerifyCodeRequest;
 import com.example.demo.enums.AccountStatus;
 import com.example.demo.exception.ApiException;
+import com.example.demo.mq.producer.UserProducer;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.response.SuccessResponse;
 import com.example.demo.utils.EmailJwtUtil;
@@ -52,6 +53,9 @@ public class UserService {
 
     @Autowired
     private EmailService emailService;
+
+    @Autowired
+    private UserProducer userProducer;
 
     @Autowired
     private StringRedisTemplate redisTemplate;
@@ -173,7 +177,9 @@ public class UserService {
 
         String token = emailJwtUtil.generateToken(user.getEmail(), user.getId());
         String verifyUrl = baseUrl + "/user/verify?token=" + token;
-        emailService.sendEmailByRegister(user.getEmail(), verifyUrl);
+
+        // emailService.sendEmailByRegister(user.getEmail(), verifyUrl);
+        userProducer.sendMail(user.getEmail(), verifyUrl);
 
         SuccessResponse response = new SuccessResponse(Map.of(
                 "id", user.getId(),
@@ -260,7 +266,7 @@ public class UserService {
         memberResponse.setBirthday(userBean.getBirthday());
         memberResponse.setGender(userBean.getGender());
         memberResponse.setImage(userBean.getImage());
-        
+
         return memberResponse;
     }
 
