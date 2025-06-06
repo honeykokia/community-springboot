@@ -28,7 +28,11 @@ public class WebConfig implements WebMvcConfigurer {
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(rateLimitInterceptor)
                 .addPathPatterns("/**") // 你要限流的 API 路徑
-                .excludePathPatterns("/uploads/**");   // 👈 明確排除靜態資源
+                .excludePathPatterns(
+                "/user/login",
+                "/user/register",
+                "/uploads/**" // 排除靜態資源
+                );
     }
 
 }

@@ -10,6 +10,8 @@ import java.util.concurrent.TimeUnit;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -232,8 +234,10 @@ public class UserService {
         return ResponseEntity.ok(response);
     }
 
+    @Cacheable(value = "memberProfile", key = "#userId")
     public ResponseEntity<?> getMemberProfile(Long userId) {
 
+        System.out.println("📦 查詢資料庫：userId = " + userId);
         Optional<UserBean> optUser = userRepo.findById(userId);
         UserBean userBean = new UserBean();
         if (optUser.isEmpty()) {
@@ -254,6 +258,7 @@ public class UserService {
         return ResponseEntity.ok(response);
     }
 
+    @CacheEvict(value = "memberProfile", key = "#userId")
     public ResponseEntity<?> updateMemberProfile(Long userId , MemberRequest request, MultipartFile file) {
 
         Optional<UserBean> optUser = userRepo.findById(userId);
