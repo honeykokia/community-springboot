@@ -8,12 +8,14 @@ import com.example.demo.dto.EmailRequest;
 import com.example.demo.dto.ErrorResult;
 import com.example.demo.dto.LoginRequest;
 import com.example.demo.dto.MemberRequest;
+import com.example.demo.dto.MemberResponse;
 import com.example.demo.dto.PasswordRequest;
 import com.example.demo.dto.RegisterRequest;
 import com.example.demo.dto.ResetPasswordRequest;
 
 import com.example.demo.dto.VerifyCodeRequest;
 import com.example.demo.exception.ApiException;
+import com.example.demo.response.SuccessResponse;
 import com.example.demo.service.UserService;
 import com.example.demo.utils.AuthUtil;
 
@@ -89,7 +91,8 @@ public class UserController {
     @GetMapping("/member")
     public ResponseEntity<?> member() {
         Long userId = AuthUtil.getCurrentUserId();
-        return userService.getMemberProfile(userId);
+        MemberResponse memberResponse = userService.getMemberProfile(userId);
+        return ResponseEntity.ok(new SuccessResponse(memberResponse));
     }
 
     @PutMapping("/member")

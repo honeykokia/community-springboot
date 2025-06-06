@@ -10,6 +10,8 @@ import java.util.concurrent.TimeUnit;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -20,12 +22,14 @@ import com.example.demo.bean.UserBean;
 import com.example.demo.dto.ErrorResult;
 import com.example.demo.dto.LoginRequest;
 import com.example.demo.dto.MemberRequest;
+import com.example.demo.dto.MemberResponse;
 import com.example.demo.dto.PasswordRequest;
 import com.example.demo.dto.RegisterRequest;
 import com.example.demo.dto.ResetPasswordRequest;
 import com.example.demo.dto.VerifyCodeRequest;
 import com.example.demo.enums.AccountStatus;
 import com.example.demo.exception.ApiException;
+import com.example.demo.mq.producer.UserProducer;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.response.SuccessResponse;
 import com.example.demo.utils.EmailJwtUtil;
@@ -49,6 +53,9 @@ public class UserService {
 
     @Autowired
     private EmailService emailService;
+
+    @Autowired
+    private UserProducer userProducer;
 
     @Autowired
     private StringRedisTemplate redisTemplate;
@@ -170,7 +177,9 @@ public class UserService {
 
         String token = emailJwtUtil.generateToken(user.getEmail(), user.getId());
         String verifyUrl = baseUrl + "/user/verify?token=" + token;
-        emailService.sendEmailByRegister(user.getEmail(), verifyUrl);
+
+        // emailService.sendEmailByRegister(user.getEmail(), verifyUrl);
+        userProducer.sendMail(user.getEmail(), verifyUrl);
 
         SuccessResponse response = new SuccessResponse(Map.of(
                 "id", user.getId(),
@@ -232,8 +241,10 @@ public class UserService {
         return ResponseEntity.ok(response);
     }
 
-    public ResponseEntity<?> getMemberProfile(Long userId) {
+    @Cacheable(value = "memberProfile", key = "#userId")
+    public MemberResponse getMemberProfile(Long userId) {
 
+        System.out.println("📦 查詢資料庫：userId = " + userId);
         Optional<UserBean> optUser = userRepo.findById(userId);
         UserBean userBean = new UserBean();
         if (optUser.isEmpty()) {
@@ -249,11 +260,17 @@ public class UserService {
             userBean.setGender("其他");
         }
 
-        SuccessResponse response = new SuccessResponse(userBean);
+        MemberResponse memberResponse = new MemberResponse();
+        memberResponse.setName(userBean.getName());
+        memberResponse.setEmail(userBean.getEmail());
+        memberResponse.setBirthday(userBean.getBirthday());
+        memberResponse.setGender(userBean.getGender());
+        memberResponse.setImage(userBean.getImage());
 
-        return ResponseEntity.ok(response);
+        return memberResponse;
     }
 
+    @CacheEvict(value = "memberProfile", key = "#userId")
     public ResponseEntity<?> updateMemberProfile(Long userId , MemberRequest request, MultipartFile file) {
 
         Optional<UserBean> optUser = userRepo.findById(userId);
