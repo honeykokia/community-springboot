@@ -58,7 +58,7 @@ public class UserController {
         return userService.loginCreateToken(request.getEmail());
     }
 
-    @PostMapping("/register")
+    @PostMapping
     public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
 
         ErrorResult result = userService.registerCheck(request);
@@ -82,20 +82,20 @@ public class UserController {
         return new RedirectView(frontEndHost + "/projectA/verifySuccess"); // Redirect to a different URL
     }
 
-    @PostMapping("/resendMail")
+    @PostMapping("/resend-verification")
     public ResponseEntity<?> resendMail(@RequestBody Map<String,String> req) {
         String email = req.get("email");
         return userService.resendMail(email);
     }
 
-    @GetMapping("/member")
+    @GetMapping("/me")
     public ResponseEntity<?> member() {
         Long userId = AuthUtil.getCurrentUserId();
         MemberResponse memberResponse = userService.getMemberProfile(userId);
         return ResponseEntity.ok(new SuccessResponse(memberResponse));
     }
 
-    @PutMapping("/member")
+    @PutMapping("/me")
     public ResponseEntity<?> memberSave(
         @RequestPart("data") MemberRequest request,
         @RequestPart(value = "file", required = false) MultipartFile file) {
@@ -104,7 +104,7 @@ public class UserController {
         return userService.updateMemberProfile(userId,request, file);
     }
 
-    @PatchMapping("/member/password")
+    @PatchMapping("/me/password")
     public ResponseEntity<?> memberPasswordUpdate(@RequestBody PasswordRequest request) {
 
         Long userId = AuthUtil.getCurrentUserId();
@@ -125,7 +125,7 @@ public class UserController {
      * 4. 同時傳送token給前端做後續驗證
      * 4. 若不存在則回傳錯誤訊息
      */
-    @PostMapping("/forgetPassword/request")
+    @PostMapping("/password-reset-requests")
     public ResponseEntity<?> forgetPassword(@RequestBody EmailRequest request) {
         String email = request.getEmail();
         return userService.forgetPassword(email);
@@ -136,7 +136,7 @@ public class UserController {
      * 2. 若正確則回傳token，並通知前端進入重設密碼頁面
      * 3. 若不正確則回傳錯誤訊息
      */
-    @PostMapping("/forgetPassword/verify")
+    @PostMapping("/password-reset-verifications")
     public ResponseEntity<?> verifyCode(@RequestBody VerifyCodeRequest request) {
         
         return userService.verifyCode(request);
@@ -149,7 +149,7 @@ public class UserController {
      * 4. 若不正確則回傳錯誤訊息
      */
 
-    @PutMapping("/forgetPassword/reset")
+    @PutMapping("/password-resets")
     public ResponseEntity<?> resetPassword(@RequestBody ResetPasswordRequest request) {
 
         return userService.resetPassword(request);
