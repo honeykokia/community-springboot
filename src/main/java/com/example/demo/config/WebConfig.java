@@ -31,7 +31,10 @@ public class WebConfig implements WebMvcConfigurer {
                 .excludePathPatterns(
                 "/user/login",
                 "/user/register",
-                "/uploads/**" // 排除靜態資源
+                "/uploads/**" , // 排除靜態資源
+                "/user/forgetPassword/**",
+                "/user/verify",
+                "/user/resendMail"
                 );
     }
 

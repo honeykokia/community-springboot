@@ -25,22 +25,14 @@ package Account{
 package Record{
     rectangle "Overview" <<complete>> as overview
     rectangle "Add Record" <<complete>> as addRecord
-    rectangle "Edit Record" <<design>> as editRecord
+    rectangle "Edit Record" <<complete>> as editRecord
     rectangle "Delete Record" <<complete>> as deleteRecord
-}
-
-package SocialCommunity{
-    rectangle "View Record Wall" <<design>> as viewRecordWall
-    rectangle "Search Account" <<design>> as searchAccount
-    rectangle "Follow System" <<design>> as followSystem
-    rectangle "Notification System" <<design>> as notificationSystem
 }
 
 register --> login
 login --> viewAccountList
 login --> userProfile
 login --> overview
-login --> viewRecordWall
 userProfile --> editProfile
 viewAccountList --> addAccount
 viewAccountList --> editAccount
@@ -49,7 +41,6 @@ viewAccountList --> viewAccountDetail
 overview --> addRecord
 overview --> editRecord
 overview --> deleteRecord
-viewRecordWall --> searchAccount
 
 
 legend
