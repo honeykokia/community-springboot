@@ -38,7 +38,7 @@ import com.example.demo.service.RecordService;
 import com.example.demo.service.UserService;
 import com.example.demo.utils.JwtUtil;
 
-@WebMvcTest // ⬅️ 只測試 AccountController
+@WebMvcTest(AccountController.class) // ⬅️ 只測試 AccountController
 @AutoConfigureMockMvc(addFilters = false) // ⬅️ 關掉 Security filter
 public class AccountControllerTest {
 
