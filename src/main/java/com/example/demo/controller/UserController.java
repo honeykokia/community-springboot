@@ -58,7 +58,7 @@ public class UserController {
         return userService.loginCreateToken(request.getEmail());
     }
 
-    @PostMapping
+    @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
 
         ErrorResult result = userService.registerCheck(request);
